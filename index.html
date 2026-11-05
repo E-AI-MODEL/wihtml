@@ -30,6 +30,15 @@
 .viewer .slide{min-height:0}.slide #slidecontent{flex:1;min-height:0;overflow:auto;scrollbar-width:thin}
 @media(max-width:800px){.micro-panel{right:10px;top:16px}.graph-controls{gap:8px}.slide .lead{font-size:14px}.slide h2{font-size:clamp(18px,4vw,38px)}.choice{min-height:30px}.slide #slidecontent{overflow:auto}}
 
+/* Ook op een donker sjabloon blijft het lesmateriaal leesbaar. */
+#viewer .slide .wi-board .lead{color:#e3eae5}
+#viewer .slide .wi-board .eyebrow{color:#99d2c6}
+#viewer .slide .wi-board .slide-text{color:#f4f7f4}
+#viewer .slide .wi-board .graph-result{color:#e3eae5}
+#viewer .slide .wi-board .step-list div{border-bottom-color:#657a6f}
+#viewer .slide .wi-board .choice{background:#fff;color:#202826;border-color:#d8e0d9}
+#viewer .slide .wi-board .wi-bottom{color:#d6e1da}
+
 /* De sjablooneditor is een tijdelijke werkruimte, niet zichtbaar tijdens het lesgeven. */
 .template-dialog{width:min(1220px,calc(100vw - 36px));height:min(92vh,860px);max-height:92vh;border:1px solid var(--line);border-radius:14px;padding:0;background:var(--paper);color:var(--ink);box-shadow:0 25px 100px #0005}
 .template-dialog::backdrop{background:rgba(8,15,12,.65)}
