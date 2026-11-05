@@ -185,7 +185,7 @@
 <script>
 const SAMPLE={title:"Verdubbelen en halveren",level:"5 havo · Wiskunde A",goal:"De leerling verklaart en berekent de verdubbelings- en halveringstijd en kan de groeifactor uit de tijd bepalen.",slides:[
 {id:"voorspel",type:"question",phase:"Voorspellen",title:"€ 1.000 wordt € 2.000. Dat duurt 12 jaar.",prompt:"Hoeveel tijd kost de groei van € 2.000 naar € 4.000?",options:["Minder dan 12 jaar","Precies 12 jaar","Meer dan 12 jaar","Dat kun je niet weten"],correct:1,explanation:"Bij dezelfde groeifactor blijft de verdubbelingstijd gelijk.",student:"Kiest eerst zelf en verklaart de keuze.",teacher:"Toont het antwoord pas na het experiment.",later:true},
-{id:"voorkennis",type:"question",phase:"Voorkennis",title:"Welke groeifactor hoort bij 15% afname?",prompt:"De hoeveelheid neemt elk uur met 15% af. Wat is de groeifactor?",options:["0,15","0,85","1,15","−0,15"],correct:1,explanation:"Er blijft 85% over, dus g = 0,85.",student:"Rekent de groeifactor zelf uit.",teacher:"Bespreekt verschillende antwoorden."},
+{id:"voorkennis",type:"quizset",phase:"Voorkennis",title:"Drie vragen over groeifactoren",prompt:"Kies eerst zelf. De uitleg verschijnt pas wanneer je docent die toont.",questions:[{prompt:"Een hoeveelheid groeit 3% per jaar. Wat is g?",options:["0,03","0,30","1,03","1,30"],correct:2,explanation:"100% + 3% = 103%, dus 1,03."},{prompt:"Een hoeveelheid daalt 15% per uur. Wat is g?",options:["0,15","0,85","1,15","−0,15"],correct:1,explanation:"Na een uur blijft 85% over, dus 0,85."},{prompt:"De groeifactor per dag is 1,10. Wat is die per week?",options:["1,17","1,70","1,95","7,70"],correct:2,explanation:"Zeven dagen: 1,10^7 ≈ 1,95."}],student:"Maakt drie keuzes en verklaart die vóór het onthullen.",teacher:"Bespreekt de redeneringen pas nadat iedereen heeft gekozen."},
 {id:"doelen",type:"text",phase:"Lesdoelen",title:"Wat ga je vandaag leren?",prompt:"Uitleggen, berekenen en controleren.",body:"Verdubbelings- en halveringstijd begrijpen. Een tijd berekenen uit een groeifactor. Een groeifactor berekenen uit een gegeven tijd.",student:"Koppelt de doelen aan de openingsvraag.",teacher:"Maakt het doel van de les zichtbaar."},
 {id:"onderzoek",type:"graph",phase:"Onderzoeken",title:"Hoe lang duurt een verdubbeling?",prompt:"Verander de beginwaarde en vergelijk twee opeenvolgende verdubbelingen.",g:Math.pow(2,1/12),b:1000,student:"Voorspelt en onderzoekt het effect van de beginwaarde.",teacher:"Laat hulplijnen pas later zien."},
 {id:"voordoen",type:"steps",phase:"Voordoen",title:"Bereken de verdubbelingstijd",prompt:"Spaargeld groeit elk jaar met 5%. Hoe lang duurt verdubbelen?",steps:["Groeifactor: g = 1,05","Los op: 1,05^t = 2","Voer op NumWorks y₁ = 1,05^x en y₂ = 2 in","Het snijpunt ligt bij x ≈ 14,2","De verdubbelingstijd is ongeveer 14,2 jaar."],student:"Voert elke stap zelf uit op de GR.",teacher:"Onthult één stap tegelijk."},
@@ -194,7 +194,7 @@ const SAMPLE={title:"Verdubbelen en halveren",level:"5 havo · Wiskunde A",goal:
 {id:"omgekeerd",type:"steps",phase:"Omgekeerd rekenen",title:"De tijd is bekend. Wat is de groeifactor?",prompt:"Cesium-137 heeft een halveringstijd van 30 jaar. Bereken de procentuele afname per jaar.",steps:["g^30 = 0,5","g = 0,5^(1/30)","g ≈ 0,9772","Afname ≈ 2,28% per jaar"],student:"Bepaalt nu zelf het onbekende grondtal.",teacher:"Bespreekt de betekenis van g."},
 {id:"check",type:"question",phase:"Begripscheck",title:"Na 18 jaar",prompt:"Een hoeveelheid verdubbelt elke 6 jaar. Beginwaarde 500. Wat is de hoeveelheid na 18 jaar?",options:["1.500","2.000","4.000","8.000"],correct:2,explanation:"Drie verdubbelingen: 500 × 2³ = 4.000.",student:"Rekent zelfstandig.",teacher:"Laat eerst iedereen tegelijk stemmen."},
 {id:"oefenen",type:"text",phase:"Oefenen",title:"Nu zelf rekenen",prompt:"Bereken de verdubbelings- of halveringstijd.",body:"1. Een bevolking groeit met 2,5% per jaar. Bereken T.\n2. Een auto verliest jaarlijks 18% van zijn waarde. Bereken de halveringstijd.\n3. Een bacteriecultuur verdubbelt elke 8 dagen. Bereken de groeifactor per dag.",student:"Rekent zelfstandig.",teacher:"Observeert waar leerlingen vastlopen."},
-{id:"fout",type:"question",phase:"Fouten onderzoeken",title:"Wat gaat hier mis?",prompt:"Een leerling gebruikt bij een afname van 15% de vergelijking 0,15^t = 0,5. Welke fout maakt de leerling?",options:["Verkeerde tijdseenheid","Verkeerde groeifactor","Verkeerde beginwaarde","Geen fout"],correct:1,explanation:"De groeifactor is 0,85. De juiste vergelijking is 0,85^t = 0,5.",student:"Verklaart de fout.",teacher:"Vraagt naar de redenering."},
+{id:"fout",type:"error",phase:"Fouten onderzoeken",title:"Wat gaat hier mis?",prompt:"Een hoeveelheid neemt ieder uur met 15% af. Een leerling schrijft:",wrong:"0,15^t = 0,5",challenge:"Welke fout maakt de leerling? Verbeter de vergelijking zelf.",correction:"Er blijft ieder uur 85% over. De juiste groeifactor is 0,85 en dus 0,85^t = 0,5.",student:"Vindt en verbetert de fout vóór het antwoord wordt getoond.",teacher:"Vraagt naar de gebruikte groeifactor."},
 {id:"exit",type:"text",phase:"Exit ticket",title:"Laat zien wat je kunt",prompt:"Werk zonder hulp.",body:"1. Een hoeveelheid groeit met 30% per uur. Bereken T.\n2. De halveringstijd is 12 jaar. Bereken de jaarlijkse afname in procenten.\n3. Is de verdubbelingstijd afhankelijk van de beginwaarde? Leg uit.",student:"Rekent zonder hulp.",teacher:"Gebruikt de antwoorden om de volgende les voor te bereiden."}
 ]};
 
@@ -320,7 +320,7 @@ $("templateFile").onchange=async e=>{
  }catch(err){$("templateError").textContent=err.message}finally{e.target.value=""}
 };
 
-const TYPES={text:"Tekst of opdracht",question:"Meerkeuzevraag",graph:"Onderzoek met grafiek",steps:"Uitwerking in stappen",table:"Onderzoekstabel",practice:"Zelfstandig oefenen",compare:"Verklaren en vergelijken"};
+const TYPES={text:"Tekst of opdracht",question:"Meerkeuzevraag",graph:"Onderzoek met grafiek",steps:"Uitwerking in stappen",table:"Onderzoekstabel",practice:"Zelfstandig oefenen",compare:"Verklaren en vergelijken",quizset:"Meerdere begripsvragen",error:"Zoek de fout"};
 
 const LAYOUTS=new Set(["single","equal","left","right"]);
 const FEATURE_DEFAULTS={drawing:true,voting:true,clock:true,focus:true,picker:true,notes:true,printing:true};
@@ -444,6 +444,8 @@ function save(){
  if(nextType==="practice"){s.tasks=($("f-tasks")?.value||"").split("\n").filter(x=>x.trim());s.hints=($("f-hints")?.value||"").split("\n");s.solutions=($("f-solutions")?.value||"").split("\n")}
  if(nextType==="compare"){s.compareLabels=($("f-compareLabels")?.value||"Voor | Na").split("|").map(x=>x.trim()).slice(0,2);s.compareItems=($("f-compareItems")?.value||"").split("\n").filter(x=>x.trim()).map(x=>x.split("|").map(v=>v.trim()).slice(0,2));s.compareConclusion=$("f-compareConclusion")?.value||""}
  if(nextType==="graph"){s.g=Number($("f-g")?.value||1.06);s.b=Number($("f-b")?.value||1000);s.target=Number($("f-target")?.value||2);s.graphExplanation=$("f-graphExplanation")?.value||""}
+ if(nextType==="quizset"){s.questions=($("f-quizLines")?.value||"").split("\n").filter(x=>x.trim()).map(line=>{const cols=line.split("|").map(x=>x.trim());return {prompt:cols[0]||"",options:cols.slice(1,5),correct:cols[5]&&/^[A-D]$/i.test(cols[5])?cols[5].toUpperCase().charCodeAt(0)-65:-1,explanation:cols.slice(6).join(" | ")||""}})}
+ if(nextType==="error"){s.wrong=$("f-wrong")?.value||"";s.challenge=$("f-challenge")?.value||"";s.correction=$("f-correction")?.value||""}
 }
 function renderEditor(){
  syncSetup();
@@ -458,6 +460,8 @@ function renderEditor(){
  :s.type==="table"?field("columnLabels","Kolomnamen (gescheiden door |)",(s.columnLabels||["Tijd","Hoeveelheid"]).join(" | "))+field("tableRows","Tabelrijen: tijd | waarde, per regel",(s.tableRows||[["0","1000"],["12","2000"]]).map(x=>x.join(" | ")).join("\n"),true)+field("tableExplanation","Uitleg, pas na onderzoek tonen",s.tableExplanation||"",true)
  :s.type==="practice"?field("tasks","Opgaven, één per regel",(s.tasks||["Bereken de verdubbelingstijd."]).join("\n"),true)+field("hints","Hulp per opgave, één per regel",(s.hints||[]).join("\n"),true)+field("solutions","Uitwerkingen per opgave, één per regel",(s.solutions||[]).join("\n"),true)
  :s.type==="compare"?field("compareLabels","Namen van twee kolommen (|)",(s.compareLabels||["Eerst","Na onderzoek"]).join(" | "))+field("compareItems","Vergelijkingen, links | rechts, per regel",(s.compareItems||[["Voorspelling","Nieuwe verklaring"]]).map(x=>x.join(" | ")).join("\n"),true)+field("compareConclusion","Conclusie, pas onthullen",s.compareConclusion||"",true)
+ :s.type==="quizset"?field("quizLines","Per regel: vraag | A | B | C | D | juiste letter | uitleg",(s.questions||[]).map(q=>[q.prompt,...(q.options||[]),String.fromCharCode(65+(q.correct??-1)),q.explanation||""].join(" | ")).join("\n"),true)
+ :s.type==="error"?field("wrong","Foutieve redenering of formule",s.wrong||"",true)+field("challenge","Wat moeten leerlingen verklaren?",s.challenge||"",true)+field("correction","Juiste uitwerking, pas na keuze",s.correction||"",true)
  :field("g","Groeifactor",s.g)+field("b","Beginwaarde",s.b)+field("target","Doelfactor (2 voor verdubbelen; 0,5 voor halveren)",s.target??(Number(s.g)<1?.5:2))+field("graphExplanation","Uitleg na onderzoek",s.graphExplanation||"",true));
  $("f-layout").value=LAYOUTS.has(s.layout)?s.layout:"inherit";
  $("type").onchange=()=>{const type=$("type").value;save();lesson.slides[selected].type=type;renderEditor()};
@@ -466,7 +470,7 @@ function renderEditor(){
 function review(){
  const notes=[];
  if(!lesson.goal?.trim())notes.push("Beschrijf wat leerlingen na deze les zelfstandig kunnen.");
- if(!lesson.slides.some(s=>s.type==="question"))notes.push("Voeg een voorspelling of begripsvraag toe.");
+ if(!lesson.slides.some(s=>["question","quizset"].includes(s.type)))notes.push("Voeg een voorspelling of begripsvraag toe.");
  if(!lesson.slides.some(s=>(s.phase||"").toLowerCase().includes("exit")))notes.push("Maak een afsluiting die leerlingen zonder hulp uitvoeren.");
  for(const [i,s] of lesson.slides.entries()){
   if(!(s.student||"").trim())notes.push("Lesdeel "+(i+1)+": wat doet de leerling?");
@@ -475,6 +479,8 @@ function review(){
   if(s.type==="practice"&&!s.tasks?.length)notes.push("Lesdeel "+(i+1)+": voeg opgaven toe.");
   if(s.type==="compare"&&!s.compareItems?.length)notes.push("Lesdeel "+(i+1)+": voeg vergelijkingen toe.");
   if(s.type==="graph"&&(s.g<=0||s.g===1||s.target<=0))notes.push("Lesdeel "+(i+1)+": controleer groeifactor en doelwaarde.");
+  if(s.type==="quizset"&&(!s.questions?.length||s.questions.some(q=>q.options?.length<2||q.options?.length>4)))notes.push("Lesdeel "+(i+1)+": controleer de begripsvragen en antwoorden.");
+  if(s.type==="error"&&(!s.wrong||!s.correction))notes.push("Lesdeel "+(i+1)+": vul de fout en verbetering in.");
  }
  $("review").innerHTML=notes.length?notes.map(t=>'<div class="review-item warn">'+esc(t)+'</div>').join(""):'<div class="review-item">Alle verplichte velden zijn ingevuld. Controleer zelf de wiskunde en de didactische keuzes.</div>';
 }
@@ -507,7 +513,9 @@ const TYPE_ALIASES={
  steps:"steps",stappen:"steps",uitwerking:"steps",
  table:"table",tabel:"table",onderzoekstabel:"table",
  practice:"practice",oefenen:"practice",oefeningen:"practice",oefening:"practice",zelfstandig:"practice",
- compare:"compare",vergelijking:"compare",vergelijken:"compare",verklaren:"compare"
+ compare:"compare",vergelijking:"compare",vergelijken:"compare",verklaren:"compare",
+ quizset:"quizset",quizgroep:"quizset",begripsvragen:"quizset",quizvragen:"quizset",
+ error:"error",foutenanalyse:"error",zoekdefout:"error"
 };
 function asText(value){
  if(value===undefined||value===null)return "";
@@ -619,6 +627,19 @@ function normalizeLessonJSON(input){
    item.correct=correct;item.explanation=asText(first(b,["explanation","verklaring","uitleg"],""));
    item.later=Boolean(first(b,["later","laterBespreken","onthulLater"],false));
   }
+  if(type==="quizset"){
+   const questions=first(b,["questions","vragen"],[]);
+   if(!Array.isArray(questions)||!questions.length||questions.length>6)throw Error("Lesdeel "+(index+1)+": gebruik 1 tot 6 begripsvragen.");
+   item.questions=questions.map((q,i)=>{
+    const choices=asList(first(q,["options","antwoorden","keuzes"],[]));
+    if(choices.length<2||choices.length>4)throw Error("Vraag "+(i+1)+": gebruik 2 tot 4 keuzes.");
+    const ans=first(q,["correct","juisteAntwoord","juist"],-1);
+    let correct=typeof ans==="number"?ans:(typeof ans==="string"&&/^[A-D]$/i.test(ans)?ans.toUpperCase().charCodeAt(0)-65:choices.indexOf(ans));
+    if(correct<0||correct>=choices.length)correct=-1;
+    return {prompt:asText(first(q,["prompt","vraag","titel"],"Vraag "+(i+1))),options:choices,correct,explanation:asText(first(q,["explanation","uitleg","verklaring"],""))};
+   });
+  }
+  if(type==="error"){item.wrong=asText(first(b,["wrong","fout","foutieveUitwerking"],""));item.challenge=asText(first(b,["challenge","opdracht","vraag"],item.prompt));item.correction=asText(first(b,["correction","verbetering","uitleg"],""))}
   if(type==="steps")item.steps=asList(first(b,["steps","stappen"],[]));
   if(type==="graph"){
    const g=Number(first(b,["g","groeifactor"],NaN)),base=Number(first(b,["b","beginwaarde"],NaN));
