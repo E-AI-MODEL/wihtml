@@ -18,6 +18,10 @@ try {
   await page.getByRole("heading", { name: "Wat gaan leerlingen zelf ontdekken?" }).waitFor();
   await page.locator("#editTemplate").click();
   await page.locator("#templateDialog").waitFor({ state: "visible" });
+  await page.locator("#themeBg").fill("#f0f3ed");
+  await page.locator("#themeFont").selectOption("serif");
+  assert.match(await page.locator("#templateCSS").inputValue(), /Georgia, serif/);
+  assert.match(await page.locator("#templateCSS").inputValue(), /#f0f3ed/);
   await page.locator("#templatePreset").selectOption("board");
   await page.locator("#templatePreview").click();
   assert.equal(await page.locator("#templateError").innerText(), "");
@@ -38,6 +42,7 @@ try {
   assert.equal(await page.locator(".wi-board").count(), 1);
   await page.locator("#close").click();
   await page.locator("#editTemplate").click();
+  await page.locator("#templateCodeDetails summary").click();
   await page.locator("#templateHTML").fill('<div><script>alert(1)</script><div data-slot="content"></div><div data-slot="footer"></div></div>');
   await page.locator("#templateApply").click();
   assert.match(await page.locator("#templateError").innerText(), /niet toegestaan/i);
@@ -391,6 +396,51 @@ try {
   await imported.locator("#close").click();
 
   await imported.close();
+
+
+  // De docent werkt rechtstreeks op de dia, niet via een groot formulier.
+  const studio = await browser.newPage({ viewport: { width: 1500, height: 920 }, acceptDownloads: true });
+  studio.on("pageerror", e => errors.push("visual-editor: "+e.message));
+  await studio.goto(pathToFileURL(path.join(root, "index.html")).href);
+  await studio.locator("#designCanvas [data-design-edit='title']").waitFor();
+  assert.equal(await studio.locator("#advancedFields").evaluate(el=>el.open),false);
+  await studio.locator("#designCanvas [data-design-edit='title']").fill("Mijn eigen lesvraag");
+  assert.equal(await studio.locator("#f-title").inputValue(),"Mijn eigen lesvraag");
+  await studio.locator("#designCanvas [data-design-edit='prompt']").fill("Wat verwacht je na twaalf jaar?");
+  assert.equal(await studio.locator("#f-prompt").inputValue(),"Wat verwacht je na twaalf jaar?");
+  await studio.locator("#designCanvas [data-design-array='options'][data-index='0']").fill("Het bedrag blijft gelijk");
+  assert.match(await studio.locator("#f-options").inputValue(),/Het bedrag blijft gelijk/);
+  await studio.locator("#designCanvas [data-design-action='setCorrect'][data-index='1']").click();
+  assert.equal(await studio.locator("#f-correct").inputValue(),"1");
+  await studio.locator("[data-design-layout='left']").click();
+  assert.equal(await studio.locator("#designCanvas").getAttribute("data-design-layout"),"left");
+  await studio.screenshot({path:path.join(screenshots,"studio-direct-bewerken.png"),fullPage:true});
+  await studio.locator("#designCopy").click();
+  assert.equal(await studio.locator("#items .slide-item").count(),13);
+  await studio.locator("#designType").selectOption("practice");
+  await studio.locator("#designCanvas [data-design-array='tasks'][data-index='0']").fill("Bereken het bedrag na 12 jaar.");
+  assert.match(await studio.locator("#f-tasks").inputValue(),/Bereken het bedrag na 12 jaar/);
+  await studio.locator("#designCanvas [data-design-action='addTask']").click();
+  assert.equal(await studio.locator("#designCanvas [data-design-array='tasks']").count(),2);
+  await studio.locator("#designCanvas [data-design-array='tasks'][data-index='1']").fill("Controleer de groeifactor.");
+  await studio.locator("#designPreview").click();
+  await studio.locator(".viewer.show").waitFor();
+  assert.match(await studio.locator("#slidecontent").innerText(),/Bereken het bedrag na 12 jaar/);
+  await studio.locator("#close").click();
+  const [visualDownload] = await Promise.all([
+    studio.waitForEvent("download"),
+    studio.locator("#export").click()
+  ]);
+  const visualExport = path.join(os.tmpdir(),"wihtml-visueel-bewerkt.html");
+  await visualDownload.saveAs(visualExport);
+  const readBack = await browser.newPage();
+  readBack.on("pageerror",e=>errors.push("visual-export: "+e.message));
+  await readBack.goto(pathToFileURL(visualExport).href);
+  await readBack.locator(".viewer.show").waitFor();
+  await readBack.locator("#next").click();
+  assert.match(await readBack.locator("#slidecontent").innerText(),/Controleer de groeifactor/);
+  await readBack.close();
+  await studio.close();
 
   assert.deepEqual(errors, [], "JavaScript-fouten tijdens browsertest");
   console.log("Browsertest geslaagd: editor, presentatie, stemrondes, pen, grafiek en HTML-export.");
