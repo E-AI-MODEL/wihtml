@@ -145,6 +145,18 @@ try {
   await page.locator("#toolbtn").click();
   await page.locator(".toolpop.show").waitFor();
   await page.screenshot({ path: path.join(screenshots, "presentatie-mobiel.png") });
+  const reference = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  reference.on("pageerror", e => errors.push("v9: "+e.message));
+  await reference.goto(pathToFileURL(path.join(root, "examples/verdubbelen-halveren-v9.html")).href);
+  assert.equal(await reference.locator("section.slide").count(), 12);
+  await reference.locator("#floatingToolBtn").click();
+  await reference.locator("#quickPen").waitFor({state:"visible"});
+  await reference.locator("#quickMore").click();
+  await reference.locator("#toolDrawer.advanced").waitFor();
+  await reference.locator("#quickMarker").click();
+  await reference.locator("#nextBtn").click();
+  await reference.screenshot({ path: path.join(screenshots, "v9-volledige-les.png") });
+  await reference.close();
   assert.deepEqual(errors, [], "JavaScript-fouten tijdens browsertest");
   console.log("Browsertest geslaagd: editor, presentatie, stemrondes, pen, grafiek en HTML-export.");
 } finally {
