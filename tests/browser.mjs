@@ -162,6 +162,10 @@ try {
   const builder = await browser.newPage({ viewport: { width: 1440, height: 900 }, acceptDownloads: true });
   builder.on("pageerror", e => errors.push("builder: "+e.message));
   await builder.goto(pathToFileURL(path.join(root, "index.html")).href);
+  builder.on("dialog", d=>d.accept());
+  await builder.locator("#newLesson").click();
+  assert.equal(await builder.locator("#title").inputValue(),"Nieuwe wiskundeles");
+  assert.equal(await builder.locator("#items .slide-item").count(),3);
   await builder.locator("#add").click();
   await builder.locator("#type").selectOption("table");
   await builder.locator("#f-title").fill("Onderzoekstabel");
