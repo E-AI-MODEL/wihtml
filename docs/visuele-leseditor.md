@@ -42,3 +42,11 @@ De GitHub Actions-browsertest controleert:
 - de bestaande stem-, grafiek- en presentatiefuncties.
 
 Dit is een technische browsercontrole en nog geen gebruikerstest met een groep wiskundedocenten.
+
+## Controle van bewaren en opnieuw openen (5 november 2026)
+
+De editor bewaart rechtstreeks bewerkte waarden zonder ze opnieuw door de regelnotatie van het uitgebreide formulier te halen. Regeleinden, verticale strepen, lege hulpvelden en begripsvragen met twee of drie keuzes blijven intact. Een volledig lesbestand behoudt bij openen de opgeslagen volgorde en lesroute. Losse inhoud gebruikt de gekozen route.
+
+Grafiekexperimenten zijn op de dia te bewerken via naam, onderzoeksvraag, instructie en getallen. De presentatie gebruikt ook beginwaarden buiten het oorspronkelijke bereik van de schuifregelaars. Ongeldige getallen krijgen een melding. Een dia verwijderen en het onthulmoment van een meerkeuzevraag kiezen kunnen rechtstreeks in de visuele editor.
+
+De aanvullende browserproef `tests/journey.mjs` doorloopt alle negen werkvormen, echte versleepbediening, opslaan en opnieuw openen van JSON, eigen vormgeving en het openen van de HTML zonder netwerk. Ook uitgeschakelde tools, toetsenbordbediening van een grafiekschuif, antwoordafdekking na navigeren via het overzicht en herstel direct na herladen worden gecontroleerd. Een gebruikerstest met wiskundedocenten en controle op een fysiek digibord blijven afzonderlijke stappen.

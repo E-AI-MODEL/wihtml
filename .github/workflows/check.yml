@@ -30,7 +30,9 @@ jobs:
           npm install --no-audit --no-fund
           npx playwright install --with-deps chromium
       - name: Test de les in Chromium
-        run: npm run test:browser
+        run: |
+          npm run test:browser
+          node tests/journey.mjs
       - name: Bewaar screenshots
         if: always()
         uses: actions/upload-artifact@v4
