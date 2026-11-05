@@ -37,6 +37,19 @@ Hiervoor is Node.js nodig om de JavaScript-syntaxis te controleren. Er draait oo
 
 Niet rechtstreeks naar `main` publiceren zonder review.
 
+## Werken met een eigen JSON-les
+
+WiHTML laat de docent drie keuzes maken: de **opbouw van de les**, de **verdeling van het scherm** en de **docentfuncties**. Daarna kan de docent een JSON-bestand met lesinhoud uploaden. De volgorde kan ook ná de import worden aangepast zonder inhoud te verwijderen.
+
+- **Opbouw:** vrij samenstellen, onderzoekend werken, uitleg en begeleid oefenen, of zelfstandig oefenen. De gekozen lesroute ordent bestaande onderdelen, zonder ze te vervangen.
+- **Vlakverdeling:** één vlak, twee gelijke vlakken, 60/40 of 40/60. Per lesdeel mag een andere verdeling gelden.
+- **Functionaliteit:** kies of tekenen, klassikaal stemmen, aftellen, spotlicht, leerlingkiezer, docentnotities en printen beschikbaar zijn. De les bewaart deze keuze.
+- **Importeren:** upload een JSON met `inhoud`, `vragen` en `opgaven` of een volledig bestand met `lesdelen`. WiHTML zet bekende onderdelen om naar een presentatie.
+
+De docent kan de gegenereerde les controleren, bijstellen en als zelfstandige HTML downloaden. Er is geen AI-model of externe server betrokken bij de omzetting. Onbekende onderdelen of ontbrekende verplichte grafiekwaarden leveren een foutmelding op, geen zelfbedachte wiskunde.
+
+[Handleiding JSON-import en veldnamen](docs/json-lesinhoud.md) · [Voorbeeld zonder dia-indeling](examples/voorbeeld-lesinhoud.json) · [Voorbeeld met lesdelen](examples/voorbeeld-lesdelen.json).
+
 ## Zelf lesonderdelen bouwen
 
 De docent kan een nieuwe les starten met **Nieuwe les**, waarna de eigen les een unieke identificatie krijgt voor lokale stemrondes.
