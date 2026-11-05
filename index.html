@@ -1231,6 +1231,7 @@ $("jsonExample").onclick=()=>download("voorbeeld-wihtml-lesinhoud.json",JSON.str
 $("import").onchange=async e=>{
  try{
   const file=e.target.files[0];if(!file)return;
+  msg("JSON wordt ingelezen...");
   if(file.size>2_000_000)throw Error("Het bestand is groter dan 2 MB.");
   const content=await file.text();
   const doc=normalizeLessonJSON(JSON.parse(content));
