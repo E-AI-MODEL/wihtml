@@ -246,11 +246,107 @@
  #viewer .slide h2{font-size:clamp(24px,6vw,38px)}
 }
 @media print{#viewer .deck-topbar,#viewer .deck-progress,#viewer .viewer-nav{display:none!important}}
+
+/* Direct bewerken. Eén groot werkvlak, geen formulier als startscherm. */
+.layout{max-width:1510px;grid-template-columns:220px minmax(0,1fr);column-gap:28px;row-gap:14px;padding:25px 30px}
+.rail{position:sticky;top:15px;max-height:calc(100dvh - 28px);overflow:auto;scrollbar-width:thin;padding-right:17px}
+.editor{min-width:0}.side{grid-column:2;border-left:0;border-top:1px solid var(--line);padding:14px 0 0;display:grid;grid-template-columns:200px minmax(0,1fr);gap:10px 24px;align-items:start}
+.side h2{font-size:20px;margin:0}.side>.hint{grid-column:1}.side #review{grid-column:2;grid-row:1/5;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:18px}
+.side .note{display:none}
+.editor>h1{font-size:clamp(27px,2.7vw,37px);margin:7px 0}.editor>.lede{font-size:13px;margin-bottom:19px;max-width:860px}
+.design-studio{max-width:1080px;background:transparent}
+.design-heading{display:flex;justify-content:space-between;align-items:center;gap:24px;margin-bottom:14px}
+.design-heading h2{font:normal clamp(21px,2vw,28px)/1.15 Georgia,serif;letter-spacing:-.025em;margin:6px 0}
+.design-heading p{font-size:13px;color:var(--muted);margin:0}
+.design-play{background:#192f39;color:#fff;border-color:#192f39;white-space:nowrap;font-size:13px;font-weight:750}
+.design-play:hover{background:#2a4851;color:#fff}
+.design-toolbar{display:flex;align-items:end;gap:12px;flex-wrap:wrap;padding:11px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-bottom:15px}
+.design-type-control{display:grid;gap:4px;min-width:176px;font-size:11px;color:var(--muted);font-weight:700}
+.design-type-control select{padding:8px 28px 8px 9px;font-size:13px;color:var(--ink);border:1px solid #cbd5ce;border-radius:7px;background:#fff}
+.design-layout-group{display:flex;gap:3px;background:#e9eeea;padding:3px;border-radius:8px;align-self:end}
+.design-layout-group button{font-size:12px;padding:7px 8px;border:0;background:transparent;border-radius:6px;font-weight:650;white-space:nowrap}
+.design-layout-group button[aria-pressed="true"]{background:white;color:#126f65;box-shadow:0 1px 5px #1a352418}
+.design-toolbar-end{display:flex;gap:5px;margin-left:auto;align-self:end}
+.design-toolbar-end button{font-size:12px;padding:8px 10px}
+.design-viewport{padding:clamp(11px,1.5vw,22px);background:#e9ebe7;border-radius:10px}
+.design-paper{aspect-ratio:16/9;min-height:300px;display:flex;flex-direction:column;overflow:auto;background:#fff;box-shadow:0 15px 36px #2738341c;border:1px solid #d6dfd8;position:relative;padding:clamp(17px,3.5vw,54px);color:#21353d;scrollbar-width:thin}
+.design-paper[data-design-layout="single"] .design-columns{display:block}
+.design-paper[data-design-layout="equal"] .design-columns{grid-template-columns:1fr 1fr}
+.design-paper[data-design-layout="left"] .design-columns{grid-template-columns:3fr 2fr}
+.design-paper[data-design-layout="right"] .design-columns{grid-template-columns:2fr 3fr}
+.design-columns{display:grid;gap:clamp(12px,2vw,28px);align-items:start;flex:1}
+.design-main,.design-body{min-width:0}
+.design-paper .design-eyebrow{color:#168074;font-size:clamp(10px,.8vw,13px);font-weight:830;letter-spacing:.1em;text-transform:uppercase}
+.design-paper .design-title{font:750 clamp(22px,3.15vw,47px)/1.08 system-ui,-apple-system,sans-serif;letter-spacing:-.047em;max-width:100%;margin:12px 0}
+.design-paper .design-prompt{font-size:clamp(13px,1.5vw,23px);line-height:1.35;max-width:95%;margin:10px 0 0;color:#47555d}
+.design-paper .design-body p{font-size:clamp(12px,1.25vw,18px);line-height:1.35}
+.design-paper .design-empty{color:#86938d;font-style:italic}
+.design-paper .design-footer{margin-top:auto;padding-top:13px;color:#89938b;font-size:11px;border-top:1px solid #e6ebe6}
+.design-paper [contenteditable="plaintext-only"]{cursor:text;display:block;white-space:pre-wrap;overflow-wrap:anywhere;border-radius:5px;outline:2px solid transparent;outline-offset:4px;min-height:1em;transition:outline-color .15s}
+.design-paper [contenteditable="plaintext-only"]:hover{outline-color:#b8dbd1}
+.design-paper [contenteditable="plaintext-only"]:focus{outline-color:#148276;background:#f3faf6}
+.design-paper [contenteditable="plaintext-only"]:empty::before{content:attr(data-placeholder);color:#92a69d;pointer-events:none;font-style:normal}
+.design-paper .design-body .design-content{font-size:clamp(13px,1.3vw,20px);line-height:1.5}
+.design-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.design-option{display:flex;align-items:center;gap:8px;border:1px solid #cbdcd2;border-radius:10px;background:white;padding:9px;min-width:0}
+.design-option>span{background:#1b5061;color:white;border-radius:7px;min-width:24px;height:25px;display:grid;place-items:center;font-size:12px;font-weight:780}
+.design-option .design-edit-text{flex:1;min-width:0;font-size:clamp(12px,1.15vw,17px);font-weight:650}
+.design-option button{padding:3px 5px;font-size:11px;border:0;border-radius:5px;color:#51615a}
+.design-option button.is-correct{background:#d9f2e4;color:#096a57}
+.design-object{border:1px solid #d4e1d8;border-radius:9px;padding:10px 12px;background:#fcfdfb;margin-bottom:8px;min-width:0}
+.design-object-title{font-size:12px;font-weight:800;color:#17695e;margin-bottom:5px}
+.design-object-main{font-size:clamp(13px,1.3vw,18px);line-height:1.4}
+.design-object button[data-design-action]{padding:4px 7px;border:0;font-size:11px;background:#f0f3ef;color:#455c52}
+.design-tiny-actions{display:flex;justify-content:flex-end;gap:5px;margin-top:6px}
+.design-add{background:transparent;border:1px dashed #b9d2c7;color:#106e60;font-weight:750;font-size:12px;width:100%;margin-top:6px;padding:9px}
+.design-row-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.design-row-grid .design-object{margin:0;padding:9px}
+.design-mini-chart{width:100%;height:auto;max-height:260px;background:#fafdfb;border:1px solid #dbe5dd;border-radius:6px}
+.design-graph-values{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}
+.design-graph-values label{font-size:11px;font-weight:680;color:#476052;display:grid;gap:4px}
+.design-graph-values input{min-width:0;width:100%;padding:7px;border-radius:6px;border:1px solid #cbdad0;font-size:13px}
+.design-hint{font-size:12px;color:#648176;margin:0 0 8px}
+.design-underbar{display:flex;align-items:start;justify-content:space-between;gap:12px;margin-top:10px}
+.design-underbar p{color:#65776d;font-size:12px;margin:0}
+#designSaved{font-size:12px;color:#167368;font-weight:680}
+.design-footer-actions{display:flex;gap:10px;flex-wrap:wrap;padding:14px 0}
+.design-footer-actions button{padding:8px 11px;font-size:12px;border:1px solid #d0ddd5;background:white}
+.design-advanced{margin-top:10px;border-top:1px solid #d6e0d8;max-width:1080px}
+.design-advanced>summary{cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:17px 0;font-size:14px;font-weight:750;list-style:none}
+.design-advanced>summary::-webkit-details-marker{display:none}
+.design-advanced>summary::after{content:"▾";color:#70877a;margin-left:auto}
+.design-advanced[open]>summary::after{content:"▴"}
+.design-advanced .editor-block{margin-top:16px}
+.design-advanced .lesson-setup{margin-top:4px}
+.design-advanced .setup-section{padding:0}
+.slide-item[draggable="true"]{cursor:grab}
+.slide-item.dragging{opacity:.45}
+.slide-item.drop-target{box-shadow:inset 0 -3px 0 #147d70}
+@media(max-width:1100px){.layout{grid-template-columns:190px minmax(0,1fr);gap:17px;padding:18px}.side{grid-template-columns:1fr}.side #review{grid-column:1;grid-row:auto}}
+@media(max-width:760px){.layout{display:block;padding:12px 14px}.rail{position:static;max-height:none;padding:0;border-right:0;border-bottom:1px solid var(--line)}.rail .slide-list{display:flex;gap:8px;overflow-x:auto;max-height:none}.rail .slide-item{min-width:180px}.rail-bottom{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0}.rail-import{flex:1}.editor{margin-top:16px}.design-heading{align-items:start}.design-heading p{display:none}.design-toolbar{gap:7px}.design-type-control{min-width:150px}.design-layout-group{order:3;width:100%;justify-content:space-between}.design-layout-group button{flex:1}.design-viewport{padding:7px}.design-paper{min-height:300px;padding:16px}.design-paper .design-title{font-size:clamp(20px,4vw,29px)}.design-paper .design-prompt{font-size:13px}.design-paper[data-design-layout="equal"] .design-columns,.design-paper[data-design-layout="left"] .design-columns,.design-paper[data-design-layout="right"] .design-columns{grid-template-columns:1fr}.design-options{grid-template-columns:1fr}.side{display:block;padding:10px 0}.side #review{display:block}}
 </style>
 </head>
 <body>
 <header><div class="top"><div class="brand"><span class="mark">w</span><div><div class="brandname">WiHTML</div><div class="byline">Wiskundelessen maken en presenteren</div></div></div><div class="actions"><button id="newLesson" title="Begin met een lege wiskundeles">Nieuwe les</button><button id="editTemplate" title="Maak je eigen HTML-sjabloon">Sjabloon maken</button><button id="save">Bewaar lesbestand</button><button id="preview">Bekijk presentatie</button><button id="export" class="primary">Download HTML</button></div></div></header>
 <main class="layout"><nav class="rail"><div class="rail-head"><span class="eyebrow">Lesverloop</span><span id="total" class="hint"></span></div><div id="items" class="slide-list"></div><div class="rail-bottom"><button id="add">+ Lesdeel toevoegen</button><div class="rail-import"><label for="import">Upload JSON-lesinhoud</label><input type="file" accept=".json,application/json" id="import"><button id="jsonExample" class="small">Voorbeeld-JSON downloaden</button><p class="hint">Ook geschikt voor lesinhoud die buiten WiHTML is gemaakt.</p></div></div></nav><section class="editor"><div class="eyebrow">Lesontwerp / Wiskunde</div><h1>Wat gaan leerlingen zelf ontdekken?</h1><p class="lede">Upload je lesinhoud als JSON, kies de opbouw en de vormgeving. WiHTML maakt er een interactieve HTML-les van.</p>
+
+<section class="design-studio" aria-label="Dia direct bewerken">
+ <div class="design-heading"><div><span class="eyebrow">De les zoals leerlingen die zien</span><h2 id="designHeading">Bewerk deze dia</h2><p>Pas de tekst direct op de dia aan. De inhoud wordt meegenomen in je HTML-bestand.</p></div><button id="designPreview" class="design-play" type="button">Bekijk deze dia <span aria-hidden="true">↗</span></button></div>
+ <div class="design-toolbar">
+  <label class="design-type-control" for="designType"><span>Werkvorm</span><select id="designType" aria-label="Werkvorm van deze dia"></select></label>
+  <div class="design-layout-group" role="group" aria-label="Verdeling van deze dia">
+   <button type="button" data-design-layout="single" title="Eén vlak">1 vlak</button>
+   <button type="button" data-design-layout="equal" title="Twee gelijke vlakken">½ + ½</button>
+   <button type="button" data-design-layout="left" title="Links 60 procent, rechts 40 procent">60 / 40</button>
+   <button type="button" data-design-layout="right" title="Links 40 procent, rechts 60 procent">40 / 60</button>
+  </div>
+  <div class="design-toolbar-end"><button id="designCopy" type="button" title="Maak een kopie van deze dia">Dupliceer</button><button id="designMoveUp" type="button" title="Zet deze dia één plek eerder">↑</button><button id="designMoveDown" type="button" title="Zet deze dia één plek later">↓</button></div>
+ </div>
+ <div class="design-viewport"><div class="design-paper" id="designCanvas" aria-label="Dia-opmaak. Klik op tekst om die te bewerken."></div></div>
+ <div class="design-underbar"><p id="designHint">Klik op de tekst om hem aan te passen.</p><span id="designSaved" role="status" aria-live="polite">Klaar om te bewerken</span></div>
+ <div class="design-footer-actions"><button id="designSettings" type="button">Lesinstellingen</button><button id="designTemplate" type="button">Vormgeving en sjablonen</button><button id="designFields" type="button">Alle velden tonen</button></div>
+</section>
+<details id="advancedFields" class="design-advanced"><summary><span>Overige lesinstellingen en velden</span><span class="hint">Voor uitgebreide aanpassingen</span></summary>
 <div class="lesson-setup" aria-label="Lesinstellingen">
  <details class="setup-section" id="structureSetup"><summary><span class="setup-index">01</span> Opbouw van de les <span class="setup-caption">Volgorde en lesroute</span></summary>
  <div class="setup-inside"><p class="hint">Je kunt lesdelen links verplaatsen. Voor een nieuwe les kun je een vaste route gebruiken.</p>
@@ -267,7 +363,7 @@
  <label><input type="checkbox" data-feature="notes"> Docentnotities</label>
  <label><input type="checkbox" data-feature="printing"> Printen</label>
  </div></details>
-</div><div class="editor-block"><div class="form-grid"><div class="field"><label for="title">Les</label><input id="title"></div><div class="field"><label for="level">Niveau</label><input id="level"></div></div><div class="field"><label for="goal">Wat kunnen leerlingen na afloop zelfstandig?</label><textarea id="goal" rows="2"></textarea></div><div class="section-head"><strong id="section-title">Lesdeel</strong><div class="mini-actions"><button class="small" id="up" title="Omhoog">↑</button><button class="small" id="down" title="Omlaag">↓</button><button class="small" id="remove">Verwijder</button></div></div><div id="fields"></div><div class="status" id="status" aria-live="polite"></div></div></section><aside class="side"><span class="eyebrow">Ontwerpcheck</span><h2>Wat vraagt deze les?</h2><p class="hint">Deze opmerkingen zijn bedoeld om je les te controleren. Ze zeggen niet of leerlingen geleerd hebben.</p><div id="review"></div><div class="note"><strong>Presentatie en tools</strong>De les gebruikt vaste 16:9-verhoudingen. Het kleine gereedschapspalet verschijnt over de dia en verandert de indeling niet.</div><div class="note"><strong>Bewaren</strong>Je kunt de les als JSON bewaren en later weer inlezen. Stemrondes blijven op deze browser opgeslagen.</div></aside></main>
+</div><div class="editor-block"><div class="form-grid"><div class="field"><label for="title">Les</label><input id="title"></div><div class="field"><label for="level">Niveau</label><input id="level"></div></div><div class="field"><label for="goal">Wat kunnen leerlingen na afloop zelfstandig?</label><textarea id="goal" rows="2"></textarea></div><div class="section-head"><strong id="section-title">Lesdeel</strong><div class="mini-actions"><button class="small" id="up" title="Omhoog">↑</button><button class="small" id="down" title="Omlaag">↓</button><button class="small" id="remove">Verwijder</button></div></div><div id="fields"></div><div class="status" id="status" aria-live="polite"></div></div></details></section><aside class="side"><span class="eyebrow">Ontwerpcheck</span><h2>Wat vraagt deze les?</h2><p class="hint">Deze opmerkingen zijn bedoeld om je les te controleren. Ze zeggen niet of leerlingen geleerd hebben.</p><div id="review"></div><div class="note"><strong>Presentatie en tools</strong>De les gebruikt vaste 16:9-verhoudingen. Het kleine gereedschapspalet verschijnt over de dia en verandert de indeling niet.</div><div class="note"><strong>Bewaren</strong>Je kunt de les als JSON bewaren en later weer inlezen. Stemrondes blijven op deze browser opgeslagen.</div></aside></main>
 <dialog id="templateDialog" aria-labelledby="templateHeading" class="template-dialog">
 <div class="template-title"><div><div class="eyebrow">Eigen sjabloon</div><h2 id="templateHeading">Ontwerp je lespagina</h2><p class="hint">Bepaal de indeling met HTML en de vormgeving met CSS. De lesinhoud en docenttools blijven werken.</p></div><button id="closeTemplate" aria-label="Sluit sjablooneditor">Sluiten</button></div>
 <div class="template-editor">
