@@ -4,6 +4,8 @@ De oorspronkelijke Docentstudio v9 (verdubbelen en halveren, 5 havo) is de funct
 
 ## Wat in WiHTML nu is gebouwd
 
+De complete v9-les staat nu ook als zelfstandige referentie in de repository. Dat voorkomt dat bestaande rijke oefeningen verdwijnen terwijl de algemene generator nog groeit.
+
 | Onderdeel uit v9 | WiHTML-status |
 | --- | --- |
 | 16:9 presentatie met dia-navigatie | Aanwezig |
@@ -20,10 +22,10 @@ De oorspronkelijke Docentstudio v9 (verdubbelen en halveren, 5 havo) is de funct
 | Volledig scherm en wit scherm | Aanwezig |
 | Eigen HTML-sjabloon ontwerpen | Aanwezig, met gecontroleerde HTML en CSS |
 | HTML-sjabloon importeren/exporteren | Aanwezig |
-| Markeren, gum, spotlicht, afdekken | Nog niet overgenomen |
-| Stopwatch en meerdere timers | Nog niet overgenomen |
-| Meerdere presentatieweergaven en aparte docentschermen | Nog niet overgenomen |
-| Volledige inhoudelijke gelijkheid met v9 | Nog niet aangetoond |
+| Markeerstift, gum, spotlicht, afdekken | Aanwezig, met sluit- en verwijderbediening |
+| Stopwatch en aftelklok met vaste en eigen tijden | Aanwezig |
+| Compacte dia, passend schalen, printen, apart docentvenster | Aanwezig; verschillende projectoren nog niet fysiek getest |
+| Volledige originele v9-les | Bewaard als eigen HTML-voorbeeld in `examples/verdubbelen-halveren-v9.html` |
 
 De functienamen hierboven slaan op de huidige broncode. Bewijs van werking komt uit GitHub Actions, voor zover een functie in de browsertest is opgenomen. De aanwezigheid van een knop is op zichzelf geen bevestiging dat deze op alle apparaten werkt.
 
@@ -47,7 +49,7 @@ Een sjabloon kun je bewaren als `.html` of `.json` en later in een andere les im
 ## Nog te verbeteren
 
 - Werk de grafiek en table-interacties uit tot het niveau van de oorspronkelijke les.
-- Neem alleen docenttools over die tijdens het lesgeven echt bruikbaar zijn.
+- Vergelijk het gedrag van de losse v9-les met de les die WiHTML uit dezelfde gegevens zou produceren. De inhoudelijke uitwerkingen zijn niet allemaal als generieke lescomponent beschikbaar.
 - Voeg een gerichte browsercontrole per tool toe.
 - Beoordeel alle voorbeeldlesdelen visueel op projectie en op een tweede scherm.
 - Controleer de HTML-export na iedere wijziging in lesinhoud, sjabloonstructuur en presentatiescript.
