@@ -404,7 +404,7 @@ function graphRender(){
  const T=reachable?Math.log(factor)/Math.log(g):NaN;
  if(graphHelp&&Number.isFinite(T)&&T>0){for(let i=1;i<=3;i++){const t=T*i;if(t>maxT)break;guides+='<line x1="'+x(t)+'" x2="'+x(t)+'" y1="'+y(b*g**t)+'" y2="257" stroke="#c96746" stroke-dasharray="5 5"/><circle cx="'+x(t)+'" cy="'+y(b*g**t)+'" r="5" fill="#c96746"/>'}}
  svg.innerHTML=grid+'<path d="M48 20 V257 H805" fill="none" stroke="#8d9891" stroke-width="2"/><path d="'+path+'" fill="none" stroke="#17695e" stroke-width="4"/>'+guides+'<text x="52" y="16" fill="#52635a" font-size="14">N = b × gᵗ</text><text x="754" y="278" font-size="12" fill="#52635a">tijd</text>';
- $("graphResult").textContent=graphHelp?(reachable?"Doelfactor "+factor.toLocaleString("nl-NL")+": "+T.toFixed(2).replace(".",",")+" tijdseenheden. "+(currentSlide().graphExplanation||""):"De gekozen doelfactor is niet bereikbaar met deze groeifactor."):"Wat verandert er aan de tijd als je de beginwaarde wijzigt?";
+ $("graphResult").textContent=graphHelp?(reachable?((factor===2&&g>1)?"Verdubbeling":(factor===.5&&g<1)?"Halvering":"Doelfactor "+factor.toLocaleString("nl-NL"))+": "+T.toFixed(2).replace(".",",")+" tijdseenheden. "+(currentSlide().graphExplanation||""):"De gekozen doelfactor is niet bereikbaar met deze groeifactor."):"Wat verandert er aan de tijd als je de beginwaarde wijzigt?";
 }
 function openStage(){
  applyTemplate();stage.classList.add("show");stage.setAttribute("aria-hidden","false");loadRounds();renderSlide();
