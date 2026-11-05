@@ -71,7 +71,7 @@
 <p id="templateHelp" class="hint">Verplicht: <code>data-slot="content"</code> en <code>data-slot="footer"</code>. Gebruik HTML-elementen en klassen voor de opbouw. Scripts en externe bronnen worden niet toegestaan.</p>
 <label for="templateCSS">CSS voor je sjabloon</label><textarea id="templateCSS" spellcheck="false" rows="12"></textarea>
 <div id="templateError" role="status" aria-live="polite"></div>
-<div class="template-actions"><button id="templatePreview">Voorbeeld vernieuwen</button><button id="templateImport">Sjabloon importeren</button><input id="templateFile" class="hide" type="file" accept=".json"><button id="templateDownload">Sjabloon exporteren</button><button id="templateApply" class="primary">Gebruik dit sjabloon</button></div>
+<div class="template-actions"><button id="templatePreview">Voorbeeld vernieuwen</button><button id="templateImport">Sjabloon importeren</button><input id="templateFile" class="hide" type="file" accept=".json,.html"><button id="templateDownload">Download HTML-sjabloon</button><button id="templateDownloadJSON">Bewaar als JSON</button><button id="templateApply" class="primary">Gebruik dit sjabloon</button></div>
 </div><div class="template-preview-area"><div class="eyebrow">Voorvertoning</div><iframe id="templateFrame" sandbox="" title="Voorbeeld van het HTML-sjabloon"></iframe><p class="hint">De voorvertoning voert geen scripts uit. In de presentatie blijven de docenttools als overlays bovenop het sjabloon beschikbaar.</p></div></div>
 </dialog>
 <div id="viewer" class="viewer" role="dialog" aria-label="Presentatie" aria-modal="true"><article class="slide"><div id="slidecontent"></div><svg class="draw" id="draw" viewBox="0 0 1200 675" preserveAspectRatio="none"></svg><div class="slide-footer" id="slidefooter"></div></article><div class="viewer-nav"><button id="prev" aria-label="Vorige dia">←</button><span id="position"></span><button id="next" aria-label="Volgende dia">→</button><button id="close" aria-label="Sluit presentatie">Sluiten</button></div><div class="floating"><div id="toolpop" class="toolpop"><button data-tool="pen">Pen aan / uit</button><button data-tool="undo">Laatste lijn weg</button><button data-tool="clear">Wis deze dia</button><button data-tool="vote">Stemmen tellen</button><button data-tool="compare">Stemrondes vergelijken</button><button data-tool="reveal">Antwoord tonen</button><button data-tool="timer">Aftelklok</button><button data-tool="notes">Docentnotities</button><button data-tool="overview">Dia-overzicht</button><button data-tool="names">Leerling kiezen</button><button data-tool="fullscreen">Volledig scherm</button><button data-tool="white">Wit scherm</button><button data-tool="black">Zwart scherm</button></div><button id="toolbtn" aria-label="Open docentgereedschap">✎</button></div></div>
@@ -178,12 +178,37 @@ $("templatePreview").onclick=previewTemplate;
 $("templateApply").onclick=()=>{
  try{lesson.template=checkedTemplate(templateDraft());$("templateDialog").close();applyTemplate();msg("Sjabloon toegepast op de les.");}catch(e){$("templateError").textContent=e.message}
 };
+
 $("templateDownload").onclick=()=>{
- try{download("wihtml-sjabloon.json",JSON.stringify(checkedTemplate(templateDraft()),null,2),"application/json");$("templateError").textContent="Sjabloon opgeslagen."}catch(e){$("templateError").textContent=e.message}
+ try{
+  const x=checkedTemplate(templateDraft());
+  const file='<!doctype html><html lang="nl"><head><meta charset="utf-8"><title>'+esc(x.name)+'</title><meta name="wihtml-template" content="1"><style id="wihtml-theme">'+x.css+'</style></head><body><template id="wihtml-template">'+x.html+'</template></body></html>';
+  download("wihtml-sjabloon.html",file,"text/html;charset=utf-8");
+  $("templateError").textContent="HTML-sjabloon opgeslagen.";
+ }catch(e){$("templateError").textContent=e.message}
 };
+$("templateDownloadJSON").onclick=()=>{
+ try{download("wihtml-sjabloon.json",JSON.stringify(checkedTemplate(templateDraft()),null,2),"application/json");$("templateError").textContent="JSON-sjabloon opgeslagen."}catch(e){$("templateError").textContent=e.message}
+};
+
 $("templateImport").onclick=()=>$("templateFile").click();
+
 $("templateFile").onchange=async e=>{
- try{const file=e.target.files[0];if(!file)return;const x=checkedTemplate(JSON.parse(await file.text()));$("templateName").value=x.name;$("templateHTML").value=x.html;$("templateCSS").value=x.css;previewTemplate()}catch(err){$("templateError").textContent=err.message}
+ try{
+  const file=e.target.files[0];if(!file)return;
+  const content=await file.text();
+  let raw;
+  if(file.name.toLowerCase().endsWith(".html")){
+   const page=new DOMParser().parseFromString(content,"text/html");
+   if(!page.querySelector('meta[name="wihtml-template"][content="1"]'))throw Error("Dit is geen WiHTML-sjabloon.");
+   const tpl=page.querySelector("#wihtml-template"),css=page.querySelector("#wihtml-theme");
+   if(!tpl||!css)throw Error("HTML-sjabloon bevat geen indeling of CSS.");
+   raw={name:page.title||"Mijn sjabloon",html:tpl.innerHTML,css:css.textContent};
+  }else raw=JSON.parse(content);
+  const x=checkedTemplate(raw);
+  $("templateName").value=x.name;$("templateHTML").value=x.html;$("templateCSS").value=x.css;previewTemplate();
+  $("templateError").textContent="Sjabloon geopend. Kies 'Gebruik dit sjabloon' om het toe te passen.";
+ }catch(err){$("templateError").textContent=err.message}finally{e.target.value=""}
 };
 
 const TYPES={text:"Tekst of opdracht",question:"Meerkeuzevraag",graph:"Onderzoek met grafiek",steps:"Uitwerking in stappen"};
