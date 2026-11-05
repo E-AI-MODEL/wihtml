@@ -417,6 +417,7 @@ let spotlightOn=false,curtainOn=false,fitMode=false,presenterWindow=null,present
 const drawConfig={pen:{stroke:"#c96746",width:4,opacity:1},marker:{stroke:"#f3c745",width:25,opacity:.48}};
 function setDrawTool(name){drawTool=drawTool===name?"":name;canvas.classList.toggle("armed",!!drawTool)}
 function activateSpotlight(){
+ closeTools();
  const previous=$("spotlightOverlay");if(previous){previous.remove();spotlightOn=false;return}
  $("curtainOverlay")?.remove();curtainOn=false;
  const panel=document.createElement("div");panel.id="spotlightOverlay";panel.className="studio-spotlight";
@@ -427,6 +428,7 @@ function activateSpotlight(){
  panel.querySelector("button").onclick=()=>{panel.remove();spotlightOn=false};
 }
 function activateCurtain(){
+ closeTools();
  const previous=$("curtainOverlay");if(previous){previous.remove();curtainOn=false;return}
  $("spotlightOverlay")?.remove();spotlightOn=false;
  const panel=document.createElement("div");panel.id="curtainOverlay";panel.className="studio-curtain";
