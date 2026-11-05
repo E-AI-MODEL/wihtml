@@ -234,6 +234,64 @@ try {
   await builtLesson.close();
   await builder.close();
 
+
+  // Externe JSON die niet eerder door WiHTML is gemaakt.
+  const imported = await browser.newPage({viewport:{width:1440,height:900},acceptDownloads:true});
+  imported.on("pageerror",e=>errors.push("JSON-import: "+e.message));
+  await imported.goto(pathToFileURL(path.join(root, "index.html")).href);
+  const externalJSON={
+    titel:"Mijn exponentiële les",niveau:"4 havo",leerdoelen:["Groeifactor uitleggen","Tijd bepalen"],
+    vlakverdeling:"right",functies:{tekenen:false,stemmen:false,timer:true,spotlicht:false},
+    lesdelen:[
+      {fase:"Voorspellen",type:"meerkeuze",titel:"Wat denk je?",vraag:"Welke grafiek groeit sneller?",antwoorden:["A","B","C"],juisteAntwoord:"B",layout:"equal",leerlingactiviteit:"Kies zelf."},
+      {fase:"Onderzoeken",type:"grafiek",titel:"Onderzoek de groeifactor",vraag:"Varieer de beginwaarde.",groeifactor:1.05,beginwaarde:1000,doelfactor:2},
+      {fase:"Exit ticket",type:"oefenen",titel:"Zelf rekenen",opgaven:[{vraag:"Bereken de verdubbelingstijd.",hint:"Gebruik de groeifactor.",uitwerking:"Ongeveer 14,2 jaar."}]}
+    ]
+  };
+  await imported.locator("#import").setInputFiles({name:"externe-lesinhoud.json",mimeType:"application/json",buffer:Buffer.from(JSON.stringify(externalJSON))});
+  assert.equal(await imported.locator("#title").inputValue(),"Mijn exponentiële les");
+  assert.equal(await imported.locator("#items .slide-item").count(),3);
+  assert.equal(await imported.locator("#defaultLayout").inputValue(),"right");
+  await imported.locator("#preview").click();
+  assert.equal(await imported.locator("#slidecontent .wi-layout.equal").count(),1);
+  await imported.locator("#toolbtn").click();
+  assert.equal(await imported.locator('[data-tool="pen"]').isHidden(),true);
+  assert.equal(await imported.locator('[data-tool="vote"]').isHidden(),true);
+  assert.equal(await imported.locator('[data-tool="timer"]').isVisible(),true);
+  await imported.locator("#toolbtn").click();
+  await imported.locator("#next").click();
+  assert.equal(await imported.locator("#slidecontent .wi-layout.right").count(),1);
+  assert.equal(await imported.locator("#plot").count(),1);
+  await imported.screenshot({path:path.join(screenshots,"json-en-vlakverdeling.png")});
+  await imported.locator("#close").click();
+  await imported.locator("#toolsSetup summary").click();
+  await imported.locator('[data-feature="drawing"]').check();
+  await imported.locator("#preview").click();
+  await imported.locator("#toolbtn").click();
+  assert.equal(await imported.locator('[data-tool="pen"]').isVisible(),true);
+  await imported.locator("#close").click();
+  const [jsonOutput]=await Promise.all([imported.waitForEvent("download"),imported.locator("#export").click()]);
+  const exportedJSONLesson=path.join(os.tmpdir(),"wihtml-json-import-output.html");
+  await jsonOutput.saveAs(exportedJSONLesson);
+  const importedStandalone=await browser.newPage({viewport:{width:1200,height:720}});
+  importedStandalone.on("pageerror",e=>errors.push("JSON-export: "+e.message));
+  await importedStandalone.goto(pathToFileURL(exportedJSONLesson).href);
+  await importedStandalone.locator(".viewer.show").waitFor();
+  assert.match(await importedStandalone.locator("#slidecontent").innerText(),/Welke grafiek groeit sneller/);
+  assert.equal(await importedStandalone.locator("#slidecontent .wi-layout.equal").count(),1);
+  await importedStandalone.locator("#next").click();
+  assert.equal(await importedStandalone.locator("#slidecontent .wi-layout.right").count(),1);
+  await importedStandalone.close();
+  const initialTitle=await imported.locator("#title").inputValue();
+  await imported.locator("#import").setInputFiles({name:"fout.json",mimeType:"application/json",buffer:Buffer.from(JSON.stringify({titel:"Fout",lesdelen:[{type:"onbekend",titel:"?"}]}))});
+  assert.equal(await imported.locator("#title").inputValue(),initialTitle);
+  assert.match(await imported.locator("#status").innerText(),/onbekend type/);
+  const [sampleJSON]=await Promise.all([imported.waitForEvent("download"),imported.locator("#jsonExample").click()]);
+  const examplePath=path.join(os.tmpdir(),"wihtml-example.json");
+  await sampleJSON.saveAs(examplePath);
+  assert.equal(JSON.parse(await fs.readFile(examplePath,"utf8")).lesdelen.length,3);
+  await imported.close();
+
   assert.deepEqual(errors, [], "JavaScript-fouten tijdens browsertest");
   console.log("Browsertest geslaagd: editor, presentatie, stemrondes, pen, grafiek en HTML-export.");
 } finally {
