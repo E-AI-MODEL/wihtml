@@ -4,7 +4,7 @@ Een rustige editor voor interactieve wiskundelessen. De docent stelt de les same
 
 ## Proefversie
 
-Open `index.html` in een browser. De editor bevat een voorbeeldles **Verdubbelen en halveren** (5 havo). Je kunt lesdelen bewerken, toevoegen, verwijderen en anders ordenen. Via **Bekijk presentatie** open je de leerlingweergave; via **Download HTML** maak je een zelfstandig lesbestand. Met **Bewaar lesbestand** maak je een JSON-bestand dat je later opnieuw kunt openen.
+Open `index.html` in een browser. De editor bevat een voorbeeldles **Verdubbelen en halveren** (5 havo). Je kunt lesdelen bewerken, toevoegen, verwijderen en anders ordenen. Via **Bekijk presentatie** open je de leerlingweergave; via **Download HTML** maak je een zelfstandig lesbestand. Met **Sjabloon maken** ontwerp je de dia-indeling in HTML en CSS, bekijk je direct het resultaat en exporteer of importeer je eigen HTML-sjablonen. Met **Bewaar lesbestand** maak je een JSON-bestand dat je later opnieuw kunt openen.
 
 Deze versie bevat een compacte presentatietoolbox met pen, ongedaan maken, wissen per dia, docentnotities, afteltimer, stemteller en vergelijking van twee stemrondes. De antwoorden worden per vraag in deze browser bewaard. De volledige oorspronkelijke Docentstudio v9 is nog niet één-op-één in de repository opgenomen; andere gereedschappen moeten selectief worden overgenomen en getest.
 
@@ -36,3 +36,7 @@ Hiervoor is Node.js nodig om de JavaScript-syntaxis te controleren. Er draait oo
 - De visuele stijl verder aanscherpen aan de hand van een concreet Figma-ontwerp.
 
 Niet rechtstreeks naar `main` publiceren zonder review.
+
+## Docentstudio v9
+
+[Vergelijking met de originele Docentstudio v9](docs/docentstudio-v9.md): welke hulpmiddelen zijn overgenomen, welke nog ontbreken en hoe de sjabloonfunctie werkt. De lesinhoud en de docentoverlays blijven los van het HTML-sjabloon.
