@@ -476,13 +476,176 @@ function download(name,content,type){
  const url=URL.createObjectURL(new Blob([content],{type})),a=document.createElement("a");a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2500)
 }
 $("save").onclick=()=>{save();download("wihtml-les.json",JSON.stringify(lesson,null,2),"application/json");msg("Lesbestand opgeslagen.")};
+
+const TYPE_ALIASES={
+ text:"text",tekst:"text",uitleg:"text",opdracht:"text",
+ question:"question",meerkeuze:"question",meerkeuzevraag:"question",vraag:"question",poll:"question",
+ graph:"graph",grafiek:"graph",grafiekonderzoek:"graph",onderzoek:"graph",
+ steps:"steps",stappen:"steps",uitwerking:"steps",
+ table:"table",tabel:"table",onderzoekstabel:"table",
+ practice:"practice",oefenen:"practice",oefeningen:"practice",oefening:"practice",zelfstandig:"practice",
+ compare:"compare",vergelijking:"compare",vergelijken:"compare",verklaren:"compare"
+};
+function asText(value){
+ if(value===undefined||value===null)return "";
+ if(Array.isArray(value))return value.map(asText).join("\n");
+ if(typeof value==="string"||typeof value==="number"||typeof value==="boolean")return String(value);
+ return "";
+}
+function asList(value){
+ if(Array.isArray(value))return value.map(x=>asText(typeof x==="object"&&x!==null?(x.tekst??x.text??x.vraag??x.opgave??x.inhoud??""):x)).filter(x=>x.trim());
+ if(typeof value==="string")return value.split("\n").map(x=>x.trim()).filter(Boolean);
+ return [];
+}
+function first(obj,keys,fallback){
+ for(const k of keys)if(obj&&Object.hasOwn(obj,k)&&obj[k]!==undefined&&obj[k]!==null)return obj[k];
+ return fallback;
+}
+function twoColumns(value){
+ if(Array.isArray(value))return value.map(x=>asText(x));
+ if(typeof value==="string")return value.split("|").map(x=>x.trim());
+ return [];
+}
+function toRows(value){
+ if(!Array.isArray(value))return typeof value==="string"?value.split("\n").filter(Boolean).map(twoColumns):[];
+ return value.map(item=>{
+  if(Array.isArray(item)||typeof item==="string")return twoColumns(item);
+  if(item&&typeof item==="object")return [asText(first(item,["tijd","time","links","left","x"],"")),asText(first(item,["waarde","value","rechts","right","y"],""))];
+  return [];
+ }).map(row=>row.slice(0,2));
+}
+function layoutValue(value){
+ const v=asText(value).toLowerCase().trim().replace(/\s+/g,"-");
+ const map={"1":"single","1-vlak":"single","een-vlak":"single","één-vlak":"single","single":"single",
+ "2":"equal","2-gelijk":"equal","twee-gelijk":"equal","twee-vlakken":"equal","equal":"equal",
+ "60-40":"left","links-60":"left","left":"left","40-60":"right","rechts-60":"right","right":"right"};
+ return map[v]||null;
+}
+function normalizedFeatures(value){
+ const out={};
+ const aliases={drawing:["drawing","tekenen","pen"],voting:["voting","stemmen","stemming"],
+  clock:["clock","timer","tijd"],focus:["focus","spotlicht","afdekken"],
+  picker:["picker","leerlingkiezer"],notes:["notes","notities","docentnotities"],printing:["printing","printen"]};
+ if(value&&typeof value==="object"&&!Array.isArray(value))
+  for(const [key,keys] of Object.entries(aliases)){
+   const provided=first(value,keys,undefined);
+   if(typeof provided==="boolean")out[key]=provided;
+  }
+ return out;
+}
+function normalizeLessonJSON(input){
+ if(!input||typeof input!=="object")throw Error("Verwacht een JSON-object met lesinhoud.");
+ const raw=Array.isArray(input)?{title:"Geïmporteerde les",slides:input}:input.lesson&&typeof input.lesson==="object"?input.lesson:input;
+ const src=first(raw,["slides","lesdelen","onderdelen","sections","blocks"],undefined);
+ let blocks=src;
+ if(!blocks&&raw.content&&typeof raw.content==="object")blocks=first(raw.content,["slides","lesdelen","sections","blocks"],undefined);
+ if(!blocks&&typeof raw.content==="string")blocks=[{type:"text",title:"Lesinhoud",body:raw.content}];
+ if(!Array.isArray(blocks)||!blocks.length)throw Error("Geen lesdelen gevonden. Gebruik 'lesdelen' of 'slides' als lijst.");
+ if(blocks.length>120)throw Error("Gebruik maximaal 120 lesdelen.");
+ const knownIDs=new Set();
+ const slides=blocks.map((block,index)=>{
+  const b=typeof block==="string"?{type:"text",body:block}:block;
+  if(!b||typeof b!=="object"||Array.isArray(b))throw Error("Lesdeel "+(index+1)+" moet tekst of een object zijn.");
+  let guessed=first(b,["type","soort","werkvorm","kind"],null);
+  if(!guessed)guessed=b.options||b.antwoorden||b.keuzes?"question":b.g||b.groeifactor?"graph":b.tasks||b.opgaven?"practice":b.tableRows||b.rijen?"table":b.steps||b.stappen?"steps":"text";
+  const type=TYPE_ALIASES[asText(guessed).toLowerCase().trim()];
+  if(!type)throw Error("Lesdeel "+(index+1)+": onbekend type '"+asText(guessed)+"'.");
+  const savedID=asText(b.id);
+  let id=savedID&&/^[a-zA-Z0-9_-]{1,90}$/.test(savedID)?savedID:"deel-"+(index+1)+"-"+Math.random().toString(36).slice(2,8);
+  if(knownIDs.has(id))id="deel-"+(index+1)+"-"+Math.random().toString(36).slice(2,8);
+  knownIDs.add(id);
+  const item={
+   id,type,
+   phase:asText(first(b,["phase","fase"],"Lesdeel")),
+   title:asText(first(b,["title","titel","kop"],"Lesdeel "+(index+1))),
+   prompt:asText(first(b,["prompt","vraag","instructie","opdracht"],"")),
+   student:asText(first(b,["student","leerling","leerlingactiviteit"],"")),
+   teacher:asText(first(b,["teacher","docent","docentrol","docentnotitie"],"")),
+   layout:layoutValue(first(b,["layout","vlakverdeling"],null))||"inherit"
+  };
+  if(type==="text")item.body=asText(first(b,["body","tekst","inhoud","content"],""));
+  if(type==="question"){
+   const options=first(b,["options","antwoorden","keuzes"],[]);
+   item.options=asList(options);
+   if(item.options.length<2||item.options.length>6)throw Error("Lesdeel "+(index+1)+": geef 2 tot 6 antwoorden op.");
+   const answer=first(b,["correct","juisteAntwoord","correctAnswer","juist"],-1);
+   let correct=-1;
+   if(typeof answer==="number"&&Number.isInteger(answer))correct=answer;
+   else if(typeof answer==="string"){
+    const letter=answer.toUpperCase().trim();
+    correct=/^[A-F]$/.test(letter)?letter.charCodeAt(0)-65:item.options.indexOf(answer);
+   }
+   item.correct=correct;item.explanation=asText(first(b,["explanation","verklaring","uitleg"],""));
+   item.later=Boolean(first(b,["later","laterBespreken","onthulLater"],false));
+  }
+  if(type==="steps")item.steps=asList(first(b,["steps","stappen"],[]));
+  if(type==="graph"){
+   const g=Number(first(b,["g","groeifactor"],NaN)),base=Number(first(b,["b","beginwaarde"],NaN));
+   if(!Number.isFinite(g)||g<=0||g===1||!Number.isFinite(base)||base<=0)throw Error("Lesdeel "+(index+1)+": grafiek heeft een positieve beginwaarde en groeifactor anders dan 1 nodig.");
+   item.g=g;item.b=base;
+   item.target=Number(first(b,["target","doelfactor"],g>1?2:.5));
+   if(!Number.isFinite(item.target)||item.target<=0)throw Error("Lesdeel "+(index+1)+": de doelfactor moet positief zijn.");
+   item.graphExplanation=asText(first(b,["graphExplanation","grafiekUitleg","verklaring"],""));
+  }
+  if(type==="table"){
+   item.columnLabels=twoColumns(first(b,["columnLabels","kolommen"],["Tijd","Waarde"])).slice(0,2);
+   item.tableRows=toRows(first(b,["tableRows","rijen"],[]));
+   item.tableExplanation=asText(first(b,["tableExplanation","tabelUitleg","verklaring"],""));
+  }
+  if(type==="practice"){
+   const items=first(b,["tasks","opgaven","oefeningen"],[]);
+   item.tasks=asList(items);
+   item.hints=asList(first(b,["hints","hulp"],[]));
+   item.solutions=asList(first(b,["solutions","uitwerkingen","oplossingen"],[]));
+   if(Array.isArray(items)&&items.every(x=>x&&typeof x==="object")){
+    item.hints=items.map(x=>asText(first(x,["hint","hulp"],"")));
+    item.solutions=items.map(x=>asText(first(x,["solution","uitwerking","antwoord"],"")));
+   }
+  }
+  if(type==="compare"){
+   item.compareLabels=twoColumns(first(b,["compareLabels","kolommen"],["Eerst","Later"])).slice(0,2);
+   item.compareItems=toRows(first(b,["compareItems","vergelijkingen"],[]));
+   item.compareConclusion=asText(first(b,["compareConclusion","conclusie","verklaring"],""));
+  }
+  return item;
+ });
+ const suppliedLayout=layoutValue(first(raw,["layout","vlakverdeling"],null));
+ const template=raw.template?checkedTemplate(raw.template):deep(lesson.template||TEMPLATE_PRESETS.editorial);
+ const newFeatures={...lesson.features,...normalizedFeatures(first(raw,["features","functies"],{}))};
+ const newId=asText(raw.id)&&/^[a-zA-Z0-9_-]{1,90}$/.test(asText(raw.id))?asText(raw.id):"les-"+Date.now()+"-"+Math.random().toString(36).slice(2,8);
+ return {
+  id:newId,
+  title:asText(first(raw,["title","titel","onderwerp","topic"],"Nieuwe wiskundeles")),
+  level:asText(first(raw,["level","niveau","leerjaar"],"Wiskunde")),
+  goal:asText(first(raw,["goal","leerdoelen","doelen","objectives"],"")),
+  slides,layout:suppliedLayout||lesson.layout||"single",
+  features:newFeatures,template
+ };
+}
+const EXAMPLE_LESSON_JSON={
+ titel:"Exponentiële groei",niveau:"5 havo",leerdoelen:["Ik kan een groeifactor bepalen.","Ik kan de verdubbelingstijd onderzoeken."],
+ vlakverdeling:"single",functies:{stemmen:true,tekenen:true,timer:true},
+ lesdelen:[
+  {fase:"Voorspellen",type:"meerkeuze",titel:"Een voorspelling",vraag:"Hoe lang duurt de volgende verdubbeling?",antwoorden:["Korter","Even lang","Langer"],juisteAntwoord:"B",laterBespreken:true,leerlingactiviteit:"Kies zelf en licht je keuze toe."},
+  {fase:"Onderzoeken",type:"grafiek",titel:"Onderzoek de groei",vraag:"Verander de beginwaarde. Wat valt op?",groeifactor:1.05,beginwaarde:1000,doelfactor:2,docentrol:"Bespreek de verklaring pas na het onderzoek."},
+  {fase:"Exit ticket",type:"oefenen",titel:"Zelf rekenen",vraag:"Werk zonder hulp.",opgaven:[{vraag:"Bereken de verdubbelingstijd bij 5% groei.",hint:"Gebruik 1,05^t = 2.",uitwerking:"t ≈ 14,2 jaar."}]}
+ ]
+};
+$("jsonExample").onclick=()=>download("voorbeeld-wihtml-lesinhoud.json",JSON.stringify(EXAMPLE_LESSON_JSON,null,2),"application/json");
 $("import").onchange=async e=>{
  try{
   const file=e.target.files[0];if(!file)return;
-  const doc=JSON.parse(await file.text());if(!Array.isArray(doc.slides)||!doc.slides.length)throw Error("Er staan geen lesdelen in dit bestand.");
-  lesson=doc;lesson.id=lesson.id||"les-"+Date.now();lesson.template=checkedTemplate(lesson.template||TEMPLATE_PRESETS.editorial);selected=0;applyTemplate();renderEditor();msg("Lesbestand geopend.");
- }catch(err){msg("Lesbestand niet geopend: "+err.message)}
+  if(file.size>2_000_000)throw Error("Het bestand is groter dan 2 MB.");
+  const content=await file.text();
+  const doc=normalizeLessonJSON(JSON.parse(content));
+  lesson=doc;selected=0;current=0;paths={};rounds={};revealed=false;
+  tableRevealed=0;compareRevealed=0;practiceState={};
+  applyTemplate();renderEditor();
+  msg("Ingelezen: "+lesson.slides.length+" lesdelen. Kies de vormgeving en functies, bekijk daarna de les of download HTML.");
+ }catch(err){msg("JSON niet ingelezen: "+err.message)}
+ finally{e.target.value=""}
 };
+
 function currentSlide(){return lesson.slides[current]}
 function roundKey(){return "wihtml.v2."+lesson.id}
 function loadRounds(){try{const raw=JSON.parse(localStorage.getItem(roundKey())||"{}");rounds=raw&&typeof raw==="object"?raw:{}}catch(e){rounds={}}}
