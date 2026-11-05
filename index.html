@@ -650,6 +650,209 @@ function save(){
  if(nextType==="quizset"){s.questions=($("f-quizLines")?.value||"").split("\n").filter(x=>x.trim()).map(line=>{const cols=line.split("|").map(x=>x.trim());return {prompt:cols[0]||"",options:cols.slice(1,5),correct:cols[5]&&/^[A-D]$/i.test(cols[5])?cols[5].toUpperCase().charCodeAt(0)-65:-1,explanation:cols.slice(6).join(" | ")||""}})}
  if(nextType==="error"){s.wrong=$("f-wrong")?.value||"";s.challenge=$("f-challenge")?.value||"";s.correction=$("f-correction")?.value||""}
 }
+
+/* Directe lesbewerking. Alle wijzigingen komen in dezelfde lesgegevens als de HTML-export. */
+function designEdit(field,value,label,cls,placeholder){
+ return '<div class="'+(cls||'design-content')+'" contenteditable="plaintext-only" role="textbox" tabindex="0" spellcheck="true" data-design-edit="'+field+'" aria-label="'+esc(label)+'" data-placeholder="'+esc(placeholder||'Klik om te schrijven')+'">'+esc(value??'')+'</div>';
+}
+function designArrayEdit(field,index,value,label,cls,placeholder){
+ return '<div class="'+(cls||'design-content')+'" contenteditable="plaintext-only" role="textbox" tabindex="0" spellcheck="true" data-design-array="'+field+'" data-index="'+index+'" aria-label="'+esc(label)+'" data-placeholder="'+esc(placeholder||'Klik om te schrijven')+'">'+esc(value??'')+'</div>';
+}
+function designMatrixEdit(field,row,col,value,label){
+ return '<div class="design-content" contenteditable="plaintext-only" role="textbox" tabindex="0" spellcheck="true" data-design-matrix="'+field+'" data-row="'+row+'" data-col="'+col+'" aria-label="'+esc(label)+'" data-placeholder="Klik om te schrijven">'+esc(value??'')+'</div>';
+}
+function designQuizEdit(question,key,opt,value,label){
+ return '<div class="design-edit-text" contenteditable="plaintext-only" role="textbox" tabindex="0" spellcheck="true" data-design-quiz="'+key+'" data-question="'+question+'" data-option="'+opt+'" aria-label="'+esc(label)+'" data-placeholder="Klik om te schrijven">'+esc(value??'')+'</div>';
+}
+function designGraphSVG(s){
+ const g=Number(s.g)||1.05,b=Number(s.b)||1000;
+ const maxX=g>1?Math.min(80,Math.max(12,Math.log(5)/Math.log(g))):50;
+ const ymax=Math.max(b*1.1,b*Math.pow(g,maxX)*1.08);
+ const xs=t=>40+628*t/maxX,ys=v=>223-193*v/ymax;
+ const curve=Array.from({length:81},(_,i)=>{
+  const t=i*maxX/80;
+  return (i?'L':'M')+xs(t).toFixed(1)+','+ys(b*Math.pow(g,t)).toFixed(1);
+ }).join(' ');
+ return '<svg id="designMiniGraph" class="design-mini-chart" viewBox="0 0 700 240" aria-label="Voorbeeldgrafiek"><path d="M40 15 V223 H672" fill="none" stroke="#a8b9b0" stroke-width="2"/><path d="'+curve+'" fill="none" stroke="#19796f" stroke-width="4"/><text x="48" y="22" font-size="13" fill="#496b63">N = '+esc(b.toLocaleString('nl-NL'))+' × '+esc(g.toFixed(3).replace('.',','))+'ᵗ</text><text x="650" y="238" font-size="12" fill="#496b63">t</text></svg>';
+}
+function designActionButton(action,index,label){
+ return '<button type="button" data-design-action="'+action+'" data-index="'+index+'" aria-label="'+esc(label)+'">'+esc(label)+'</button>';
+}
+function designBody(s){
+ if(s.type==='text')return designEdit('body',s.body,'Tekst op deze dia','design-content','Voeg hier je uitleg of opdracht toe.');
+ if(s.type==='question'){
+  const options=(s.options||[]).slice(0,4);
+  return '<div class="design-options">'+options.map((v,i)=>'<div class="design-option"><span>'+String.fromCharCode(65+i)+'</span>'+designArrayEdit('options',i,v,'Antwoord '+String.fromCharCode(65+i),'design-edit-text','Antwoord')+designActionButton('setCorrect',i,(s.correct===i?'✓ Juiste':'Juiste'))+designActionButton('removeOption',i,'×')+'</div>').join('')+'</div>'+(options.length<4?'<button class="design-add" data-design-action="addOption" type="button">+ Antwoord toevoegen</button>':'')+'<p class="design-hint">De knop Juiste bepaalt het juiste antwoord. Dat verschijnt pas wanneer je het toont.</p>'+designEdit('explanation',s.explanation,'Uitleg na de vraag','design-content','Uitleg die pas na de vraag verschijnt.');
+ }
+ if(s.type==='steps'){
+  return '<div>'+((s.steps||[]).map((step,i)=>'<div class="design-object"><div class="design-object-title">Stap '+(i+1)+'</div>'+designArrayEdit('steps',i,step,'Stap '+(i+1),'design-object-main','Beschrijf deze stap')+'<div class="design-tiny-actions">'+designActionButton('removeStep',i,'Verwijder')+'</div></div>').join(''))+'</div><button class="design-add" data-design-action="addStep" type="button">+ Stap toevoegen</button>';
+ }
+ if(s.type==='table'||s.type==='compare'){
+  const table=s.type==='table',field=table?'tableRows':'compareItems';
+  const labels=table?(s.columnLabels||['Tijd','Waarde']):(s.compareLabels||['Eerst','Later']);
+  const rows=s[field]||[];
+  return '<div class="design-row-grid">'+[0,1].map(i=>'<div class="design-object"><div class="design-object-title">Kolom '+(i+1)+'</div>'+designArrayEdit(table?'columnLabels':'compareLabels',i,labels[i],'Kolomtitel '+(i+1),'design-content','Kolomnaam')+'</div>').join('')+'</div><div>'+rows.map((r,i)=>'<div class="design-object"><div class="design-row-grid">'+[0,1].map(j=>designMatrixEdit(field,i,j,r?.[j]||'','Rij '+(i+1)+', kolom '+(j+1))).join('')+'</div><div class="design-tiny-actions">'+designActionButton('removeRow',i,'Verwijder rij')+'</div></div>').join('')+'</div><button class="design-add" data-design-action="addRow" type="button">+ Rij toevoegen</button>'+designEdit(table?'tableExplanation':'compareConclusion',table?s.tableExplanation:s.compareConclusion,table?'Uitleg na de tabel':'Conclusie','design-content','Uitleg die je later laat zien');
+ }
+ if(s.type==='practice'){
+  return '<div>'+((s.tasks||[]).map((task,i)=>'<div class="design-object"><div class="design-object-title">Opgave '+(i+1)+'</div>'+designArrayEdit('tasks',i,task,'Opgave '+(i+1),'design-object-main','Beschrijf de opgave')+'<details class="design-task-help"><summary>Hulp en uitwerking</summary><div class="design-hint">Hulp</div>'+designArrayEdit('hints',i,(s.hints||[])[i],'Hulp voor opgave '+(i+1),'design-content','Tip voor leerlingen')+'<div class="design-hint">Uitwerking</div>'+designArrayEdit('solutions',i,(s.solutions||[])[i],'Uitwerking voor opgave '+(i+1),'design-content','De uitwerking verschijnt later')+'</details><div class="design-tiny-actions">'+designActionButton('removeTask',i,'Verwijder opgave')+'</div></div>').join(''))+'</div><button class="design-add" data-design-action="addTask" type="button">+ Opgave toevoegen</button>';
+ }
+ if(s.type==='quizset'){
+  return '<div class="design-row-grid">'+(s.questions||[]).map((q,i)=>'<div class="design-object"><div class="design-object-title">Begripsvraag '+(i+1)+'</div>'+designQuizEdit(i,'prompt',0,q.prompt,'Vraag '+(i+1))+'<div class="design-quiz-options">'+(q.options||[]).map((opt,j)=>'<div class="design-option"><span>'+String.fromCharCode(65+j)+'</span>'+designQuizEdit(i,'option',j,opt,'Keuze '+String.fromCharCode(65+j))+'<button type="button" data-design-action="setQuizCorrect" data-index="'+i+'" data-option="'+j+'" class="'+(q.correct===j?'is-correct':'')+'" title="Dit is het juiste antwoord">✓</button></div>').join('')+'</div><details><summary>Uitleg</summary>'+designQuizEdit(i,'explanation',0,q.explanation,'Uitleg voor vraag '+(i+1))+'</details><div class="design-tiny-actions">'+designActionButton('removeQuiz',i,'Verwijder vraag')+'</div></div>').join('')+'</div><button class="design-add" data-design-action="addQuiz" type="button">+ Begripsvraag toevoegen</button>';
+ }
+ if(s.type==='error'){
+  return '<div class="design-row-grid"><div class="design-object"><div class="design-object-title">Leerlingaanpak</div>'+designEdit('wrong',s.wrong,'De foutieve uitwerking','design-object-main','Schrijf hier de foutieve berekening')+'</div><div class="design-object"><div class="design-object-title">Verklaring</div>'+designEdit('challenge',s.challenge,'Opdracht bij de fout','design-content','Wat moeten leerlingen verbeteren?')+'</div></div><div class="design-object"><div class="design-object-title">Later onthullen</div>'+designEdit('correction',s.correction,'Juiste aanpak','design-content','Juiste berekening en uitleg')+'</div>';
+ }
+ if(s.type==='graph'){
+  return '<div class="design-hint">Deze grafiek reageert in de presentatie op de schuifregelaars. Hier stel je de beginwaarden in.</div>'+designGraphSVG(s)+'<div class="design-graph-values">'+[['g','Groeifactor',s.g||1.05],['b','Beginwaarde',s.b||1000],['target','Doelfactor',s.target||2]].map(([key,label,val])=>'<label>'+label+'<input type="number" data-design-number="'+key+'" step="any" min=".001" value="'+esc(val)+'"></label>').join('')+'</div><p class="design-hint">Meerdere experimenten kun je bij Alle velden tonen aanpassen.</p>'+designEdit('graphExplanation',s.graphExplanation,'Uitleg bij grafiek','design-content','Welke verklaring wil je later tonen?');
+ }
+ return '<p class="design-empty">Kies een werkvorm om te beginnen.</p>';
+}
+function syncDesignForm(s){
+ for(const key of ['phase','title','prompt','student','teacher','body','explanation','wrong','challenge','correction','graphExplanation','tableExplanation','compareConclusion']){
+  const node=$('f-'+key);if(node)node.value=s[key]??'';
+ }
+ const arrays={options:s.options,steps:s.steps,tasks:s.tasks,hints:s.hints,solutions:s.solutions};
+ for(const [key,value] of Object.entries(arrays)){
+  const node=$('f-'+key);if(node)node.value=(value||[]).join('\n');
+ }
+ for(const key of ['tableRows','compareItems']){
+  const node=$('f-'+key);if(node)node.value=(s[key]||[]).map(row=>row.join(' | ')).join('\n');
+ }
+ for(const key of ['columnLabels','compareLabels']){
+  const node=$('f-'+key);if(node)node.value=(s[key]||[]).join(' | ');
+ }
+ for(const key of ['g','b','target','correct']){
+  const node=$('f-'+key);if(node)node.value=s[key]??'';
+ }
+ const quiz=$('f-quizLines');
+ if(quiz)quiz.value=(s.questions||[]).map(q=>[q.prompt,...(q.options||[]),q.correct>=0?String.fromCharCode(65+q.correct):'',q.explanation||''].join(' | ')).join('\n');
+}
+function designChanged(){
+ const slide=lesson.slides[selected];
+ syncDesignForm(slide);
+ const item=$('items').querySelector('[data-i="'+selected+'"]');
+ if(item){const title=item.querySelector('strong'),phase=item.querySelector('em');if(title)title.textContent=slide.title||'Zonder titel';if(phase)phase.textContent=slide.phase||'Lesdeel';}
+ $('designHeading').textContent='Dia '+(selected+1)+' · '+(slide.title||'Zonder titel');
+ $('designSaved').textContent='Gewijzigd · bewaar je lesbestand';
+ review();
+}
+function renderDesigner(){
+ const s=lesson.slides[selected];if(!s)return;
+ const effective=s.layout&&s.layout!=='inherit'?s.layout:lesson.layout;
+ $('designHeading').textContent='Dia '+(selected+1)+' · '+(s.title||'Zonder titel');
+ $('designType').innerHTML=Object.entries(TYPES).map(([key,val])=>'<option value="'+key+'">'+esc(val)+'</option>').join('');
+ $('designType').value=s.type;
+ document.querySelectorAll('[data-design-layout]').forEach(btn=>btn.setAttribute('aria-pressed',String(effective===btn.dataset.designLayout)));
+ $('designMoveUp').disabled=selected===0;
+ $('designMoveDown').disabled=selected===lesson.slides.length-1;
+ const intro='<div class="design-main">'+designEdit('phase',s.phase,'Lesfase','design-eyebrow','Bijvoorbeeld: onderzoeken')+designEdit('title',s.title,'Titel van deze dia','design-title','Geef deze dia een titel')+designEdit('prompt',s.prompt,'Vraag of instructie','design-prompt','Welke vraag stel je aan leerlingen?')+'</div>';
+ const body='<div class="design-body">'+designBody(s)+'</div>';
+ $('designCanvas').dataset.designLayout=effective;
+ $('designCanvas').innerHTML='<div class="design-columns">'+intro+body+'</div><div class="design-footer">'+esc(lesson.level||'Wiskunde')+' · '+esc(lesson.title||'Nieuwe les')+' · dia '+(selected+1)+' van '+lesson.slides.length+'</div>';
+ $('designHint').textContent=s.type==='graph'?'Stel de getallen in. Test de interactie met Bekijk deze dia.':s.type==='practice'?'Klik op een opgave. Hulp en uitwerking kun je afzonderlijk bewerken.':'Klik op tekst of een onderdeel om het aan te passen.';
+ $('designSaved').textContent='Direct bewerken';
+}
+function initDesignType(type){
+ const s=lesson.slides[selected];
+ if(type==='question'){s.options=s.options?.length>=2?s.options:['Antwoord A','Antwoord B','Antwoord C','Antwoord D'];s.correct=Number.isInteger(s.correct)?s.correct:-1}
+ if(type==='steps')s.steps=s.steps?.length?s.steps:['Beschrijf de eerste stap'];
+ if(type==='table'){s.columnLabels=s.columnLabels?.length===2?s.columnLabels:['Tijd','Waarde'];s.tableRows=s.tableRows?.length?s.tableRows:[['0','1000'],['12','2000']]}
+ if(type==='compare'){s.compareLabels=s.compareLabels?.length===2?s.compareLabels:['Eerst','Daarna'];s.compareItems=s.compareItems?.length?s.compareItems:[['Voorspelling','Verklaring']]}
+ if(type==='practice'){s.tasks=s.tasks?.length?s.tasks:['Beschrijf de opgave'];s.hints=s.hints||[];s.solutions=s.solutions||[]}
+ if(type==='quizset')s.questions=s.questions?.length?s.questions:[{prompt:'Welke keuze maak je?',options:['A','B','C','D'],correct:-1,explanation:''}];
+ if(type==='graph'){s.g=Number(s.g)>0&&s.g!==1?Number(s.g):1.05;s.b=Number(s.b)>0?Number(s.b):1000;s.target=Number(s.target)>0?Number(s.target):2}
+ if(type==='error'){s.wrong=s.wrong||'0,15^t = 0,5';s.challenge=s.challenge||'Wat is hier fout gegaan?';s.correction=s.correction||''}
+}
+function initDesignControls(){
+ const canvas=$('designCanvas');
+ canvas.addEventListener('input',e=>{
+  const el=e.target,s=lesson.slides[selected];if(!s)return;
+  const value=el.innerText??el.textContent??'';
+  if(el.dataset.designEdit){s[el.dataset.designEdit]=value;designChanged();return}
+  if(el.dataset.designArray){
+   const field=el.dataset.designArray,index=Number(el.dataset.index);s[field]??=[];s[field][index]=value;designChanged();return;
+  }
+  if(el.dataset.designMatrix){
+   const field=el.dataset.designMatrix,index=Number(el.dataset.row),col=Number(el.dataset.col);
+   s[field]??=[];s[field][index]??=['',''];s[field][index][col]=value;designChanged();return;
+  }
+  if(el.dataset.designQuiz){
+   const index=Number(el.dataset.question),key=el.dataset.designQuiz;
+   const q=(s.questions||[])[index];if(!q)return;
+   if(key==='option')q.options[Number(el.dataset.option)]=value;
+   else q[key]=value;
+   designChanged();return;
+  }
+  if(el.dataset.designNumber){
+   const val=Number(el.value);if(!Number.isFinite(val)||val<=0||(el.dataset.designNumber==='g'&&val===1))return;
+   s[el.dataset.designNumber]=val;syncDesignForm(s);
+   const old=$('designMiniGraph');if(old)old.outerHTML=designGraphSVG(s);
+   designChanged();
+  }
+ });
+ canvas.addEventListener('click',e=>{
+  const btn=e.target.closest('button[data-design-action]');if(!btn)return;
+  const s=lesson.slides[selected],a=btn.dataset.designAction,i=Number(btn.dataset.index);
+  if(a==='setCorrect')s.correct=i;
+  if(a==='removeOption'&&s.options?.length>2){s.options.splice(i,1);if(s.correct===i)s.correct=-1;else if(s.correct>i)s.correct--}
+  if(a==='addOption'&&(s.options||[]).length<4)(s.options??=[]).push('Nieuw antwoord');
+  if(a==='addStep')(s.steps??=[]).push('Beschrijf deze stap');
+  if(a==='removeStep'&&s.steps?.length>1)s.steps.splice(i,1);
+  if(a==='addRow')(s[s.type==='table'?'tableRows':'compareItems']??=[]).push(['','']);
+  if(a==='removeRow'&&(s[s.type==='table'?'tableRows':'compareItems']||[]).length>1)s[s.type==='table'?'tableRows':'compareItems'].splice(i,1);
+  if(a==='addTask'){(s.tasks??=[]).push('Nieuwe opgave');(s.hints??=[]).push('');(s.solutions??=[]).push('')}
+  if(a==='removeTask'&&s.tasks?.length>1){s.tasks.splice(i,1);s.hints?.splice(i,1);s.solutions?.splice(i,1)}
+  if(a==='addQuiz'&&(s.questions||[]).length<6)(s.questions??=[]).push({prompt:'Nieuwe begripsvraag',options:['A','B','C','D'],correct:-1,explanation:''});
+  if(a==='removeQuiz'&&s.questions?.length>1)s.questions.splice(i,1);
+  if(a==='setQuizCorrect'){if(s.questions?.[i])s.questions[i].correct=Number(btn.dataset.option)}
+  syncDesignForm(s);renderDesigner();designChanged();
+ });
+ canvas.addEventListener('keydown',e=>{
+  const field=e.target.dataset?.designEdit;
+  if(e.key==='Enter'&&['phase','title'].includes(field)){e.preventDefault();e.target.blur()}
+ });
+ $('designType').addEventListener('change',e=>{
+  save();lesson.slides[selected].type=e.target.value;initDesignType(e.target.value);renderEditor();
+ });
+ document.querySelectorAll('[data-design-layout]').forEach(btn=>btn.onclick=()=>{
+  save();const s=lesson.slides[selected];s.layout=btn.dataset.designLayout;
+  if($('f-layout'))$('f-layout').value=s.layout;
+  renderDesigner();designChanged();
+ });
+ $('designCopy').onclick=()=>{
+  save();const clone=deep(lesson.slides[selected]);clone.id='deel-'+Date.now()+'-'+Math.random().toString(36).slice(2,8);
+  clone.title=(clone.title||'Lesdeel')+' (kopie)';
+  lesson.slides.splice(selected+1,0,clone);selected++;renderEditor();
+ };
+ $('designMoveUp').onclick=()=>{if(selected>0)$('up').click()};
+ $('designMoveDown').onclick=()=>{if(selected<lesson.slides.length-1)$('down').click()};
+ $('designPreview').onclick=()=>{$('preview').click();current=selected;renderSlide()};
+ $('designSettings').onclick=()=>{$('advancedFields').open=true;$('structureSetup').open=true;$('layoutSetup').open=true;$('toolsSetup').open=true;$('advancedFields').scrollIntoView({behavior:'smooth',block:'start'})};
+ $('designTemplate').onclick=()=>$('editTemplate').click();
+ $('designFields').onclick=()=>{$('advancedFields').open=true;document.querySelector('.editor-block').scrollIntoView({behavior:'smooth',block:'start'})};
+}
+function bindStoryBoard(){
+ let dragged=null;
+ $('items').querySelectorAll('.slide-item').forEach(item=>{
+  item.draggable=true;
+  item.addEventListener('dragstart',e=>{
+   dragged=Number(item.dataset.i);item.classList.add('dragging');e.dataTransfer.effectAllowed='move';
+   e.dataTransfer.setData('text/plain',String(dragged));
+  });
+  item.addEventListener('dragover',e=>{e.preventDefault();item.classList.add('drop-target')});
+  item.addEventListener('dragleave',()=>item.classList.remove('drop-target'));
+  item.addEventListener('drop',e=>{
+   e.preventDefault();item.classList.remove('drop-target');
+   const dest=Number(item.dataset.i);
+   if(!Number.isInteger(dragged)||dragged===dest)return;
+   save();const active=lesson.slides[selected]?.id;
+   const moved=lesson.slides.splice(dragged,1)[0];lesson.slides.splice(dest,0,moved);
+   selected=lesson.slides.findIndex(x=>x.id===active);renderEditor();
+  });
+  item.addEventListener('dragend',()=>{dragged=null;document.querySelectorAll('.drop-target,.dragging').forEach(el=>el.classList.remove('drop-target','dragging'))});
+ });
+}
+
 function renderEditor(){
  syncSetup();
  $("title").value=lesson.title;$("level").value=lesson.level;$("goal").value=lesson.goal;
@@ -667,8 +870,10 @@ function renderEditor(){
  :s.type==="error"?field("wrong","Foutieve redenering of formule",s.wrong||"",true)+field("challenge","Wat moeten leerlingen verklaren?",s.challenge||"",true)+field("correction","Juiste uitwerking, pas na keuze",s.correction||"",true)
  :field("g","Groeifactor",s.g)+field("b","Beginwaarde",s.b)+field("target","Doelfactor (2 voor verdubbelen; 0,5 voor halveren)",s.target??(Number(s.g)<1?.5:2))+field("graphExplanation","Uitleg na onderzoek",s.graphExplanation||"",true)+field("experiments","Eigen experimenten (optioneel): naam | onderzoeksvraag | groeifactor | beginwaarde | doelfactor | instructie",(s.experiments||[]).map(x=>[x.label,x.question,x.g,x.b,x.target,x.instruction||""].join(" | ")).join("\n"),true));
  $("f-layout").value=LAYOUTS.has(s.layout)?s.layout:"inherit";
- $("type").onchange=()=>{const type=$("type").value;save();lesson.slides[selected].type=type;renderEditor()};
+ $("type").onchange=()=>{const type=$("type").value;save();lesson.slides[selected].type=type;initDesignType(type);renderEditor()};
  review();
+ renderDesigner();
+ bindStoryBoard();
 }
 function review(){
  const notes=[];
