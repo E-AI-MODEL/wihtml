@@ -37,6 +37,14 @@ Hiervoor is Node.js nodig om de JavaScript-syntaxis te controleren. Er draait oo
 
 Niet rechtstreeks naar `main` publiceren zonder review.
 
+## Les direct op de dia bewerken
+
+In de visuele studio staat de gekozen dia centraal. Klik op een titel, vraag, antwoord, opgave of tabelcel om de inhoud aan te passen. Je kunt dia's slepen, dupliceren en een andere werkvorm of vlakverdeling kiezen. Met **Bekijk deze dia** open je de volledige interactieve presentatie vanaf de geselecteerde dia.
+
+Vormgeving pas je aan via kleuren, lettertype en witruimte. HTML en CSS zijn optioneel en staan bij de uitgebreide instellingen. Je concept wordt lokaal in de browser bewaard; download een lesbestand voor een eigen kopie. De zelfstandige HTML-export behoudt de werkvormen en docenttools.
+
+[Uitleg over de visuele lesbewerking](docs/visuele-leseditor.md).
+
 ## Werken met een eigen JSON-les
 
 WiHTML laat de docent drie keuzes maken: de **opbouw van de les**, de **verdeling van het scherm** en de **docentfuncties**. Daarna kan de docent een JSON-bestand met lesinhoud uploaden. De volgorde kan ook ná de import worden aangepast zonder inhoud te verwijderen.
