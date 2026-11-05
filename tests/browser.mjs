@@ -30,7 +30,7 @@ try {
   assert.match(await fs.readFile(templateFile,"utf8"), /wihtml-template/);
   await page.locator("#templateImport").click();
   await page.locator("#templateFile").setInputFiles(templateFile);
-  assert.match(await page.locator("#templateError").innerText(), /Sjabloon geopend/);
+  await page.waitForFunction(() => document.querySelector("#templateError").textContent.includes("Sjabloon geopend"), { timeout: 5000 });
   await page.locator("#templateApply").click();
   assert.equal(await page.locator("#templateDialog").isVisible(), false);
   await page.locator("#preview").click();
