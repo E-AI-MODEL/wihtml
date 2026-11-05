@@ -547,7 +547,7 @@ $("templatePreset").onchange=()=>{
 };
 $("templatePreview").onclick=previewTemplate;
 $("templateApply").onclick=()=>{
- try{const next=checkedTemplate(templateDraft());const previous=lesson.template;lesson.template=next;try{applyTemplate()}catch(error){lesson.template=previous;applyTemplate();throw error}$("templateDialog").close();msg("Sjabloon toegepast op de les.");}catch(e){$("templateError").textContent=e.message}
+ try{const next=checkedTemplate(templateDraft());const previous=lesson.template;lesson.template=next;try{applyTemplate()}catch(error){lesson.template=previous;applyTemplate();throw error}renderDesigner();scheduleDraftSave();$("templateDialog").close();msg("Sjabloon toegepast op de les.");}catch(e){$("templateError").textContent=e.message}
 };
 
 $("templateDownload").onclick=()=>{
@@ -671,6 +671,7 @@ $("applyRoute").onclick=()=>{
 $("defaultLayout").onchange=()=>{
  lesson.layout=LAYOUTS.has($("defaultLayout").value)?$("defaultLayout").value:"single";
  $("layoutDiagram").dataset.layout=lesson.layout;
+ renderDesigner();
  msg("Vlakverdeling ingesteld voor de les.");
 };
 document.querySelectorAll("[data-feature]").forEach(el=>el.onchange=()=>{
@@ -1666,7 +1667,7 @@ lesson.template=checkedTemplate(lesson.template||TEMPLATE_PRESETS.editorial);
 applyTemplate();
 initDesignControls();
 $('draftRestore').onclick=restoreDraft;
-$('fields').addEventListener('input',event=>{if(event.target.id!=='type')save()});
+$('fields').addEventListener('input',event=>{if(event.target.id!=='type'){save();renderDesigner()}});
 ['title','level','goal'].forEach(id=>$(id).addEventListener('input',()=>{save();const footer=$('designCanvas').querySelector('.design-footer');if(footer)footer.textContent=(lesson.level||'Wiskunde')+' · '+(lesson.title||'Nieuwe les')+' · dia '+(selected+1)+' van '+lesson.slides.length}));
 loadRounds();
 renderEditor();
