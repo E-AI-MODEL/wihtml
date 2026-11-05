@@ -134,7 +134,7 @@ function checkedTemplate(t){
   return selectors.map(sel=>"#viewer .slide "+sel).join(", ")+" { "+body+" }";
  }).join("\n");
  const cleaned=root.innerHTML;
- return {name:String(t.name||"Mijn sjabloon").slice(0,90),html:cleaned,css};
+ return {name:String(t.name||"Mijn sjabloon").slice(0,90),html:cleaned,css:t.css};
 }
 function makeTemplatePanel(){
  const current=lesson.template||TEMPLATE_PRESETS.editorial;
@@ -154,6 +154,7 @@ function previewTemplate(){
   $("templateFrame").srcdoc=doc;$("templateError").textContent="";
  }catch(e){$("templateError").textContent=e.message}
 }
+function scopeTemplateCSS(raw){return raw.replace(/([^{}]+)\{([^{}]*)\}/g,(_,selectors,body)=>selectors.split(",").map(x=>"#viewer .slide "+x.trim()).join(", ")+" {"+body+"}")}
 function applyTemplate(){
  const wrapper=$("viewer").querySelector(".slide");
  const contents=$("slidecontent"),footer=$("slidefooter"),ink=$("draw");
@@ -166,7 +167,7 @@ function applyTemplate(){
  placeContent.append(contents);placeFooter.append(footer);
  wrapper.insertBefore(shell,ink);
  let style=$("templateStyles");if(!style){style=document.createElement("style");style.id="templateStyles";document.head.append(style)}
- style.textContent=x.css;
+ style.textContent=scopeTemplateCSS(x.css);
 }
 $("editTemplate").onclick=makeTemplatePanel;
 $("closeTemplate").onclick=()=>$("templateDialog").close();
