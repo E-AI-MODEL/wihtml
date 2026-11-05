@@ -45,7 +45,16 @@ document.querySelectorAll("[data-tool]").forEach(b=>b.onclick=()=>{const t=b.dat
 let drawing=false,path=null;const layer=$("draw");layer.addEventListener("pointerdown",e=>{if(tool!=="pen")return;drawing=true;layer.setPointerCapture(e.pointerId);const rect=layer.getBoundingClientRect(),x=(e.clientX-rect.left)/rect.width*1200,y=(e.clientY-rect.top)/rect.height*675;path=document.createElementNS("http://www.w3.org/2000/svg","path");path.setAttribute("d","M"+x+" "+y);path.setAttribute("fill","none");path.setAttribute("stroke","#c96746");path.setAttribute("stroke-width","4");path.setAttribute("stroke-linecap","round");layer.append(path)});layer.addEventListener("pointermove",e=>{if(!drawing||!path)return;const r=layer.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*1200,y=(e.clientY-r.top)/r.height*675;path.setAttribute("d",path.getAttribute("d")+" L"+x+" "+y)});layer.addEventListener("pointerup",()=>{if(path){let id=lesson.slides[current].id;(strokes[id]??=[]).push(path.outerHTML)}drawing=false;path=null});
 window.addEventListener("keydown",e=>{if(!$("viewer").classList.contains("show"))return;if(e.key==="Escape")$("close").click();if(e.key==="ArrowRight")$("next").click();if(e.key==="ArrowLeft")$("prev").click()});
 try{votes=JSON.parse(localStorage.getItem("wihtml-votes")||"{}")}catch(e){votes={}}
-$("export").onclick=()=>{save();const source=document.documentElement.outerHTML;const data=JSON.stringify(lesson).replace(/</g,"\\u003c");let result=source.replace(/const SAMPLE=\{[\s\S]*?\};\nconst \$=/,"const SAMPLE="+data+";\nconst $=");result=result.replace(/<main class="layout">[\s\S]*?<div id="viewer"/,'<main class="layout" style="display:none"></main><div id="viewer"');result=result.replace('let lesson=structuredClone(SAMPLE)','let lesson=structuredClone(SAMPLE)');result=result.replace('render()}\nfunction field','render()}\nfunction field');result=result.replace('document.querySelectorAll("[data-i]")','document.querySelectorAll("[data-i]")');download("wihtml-"+(lesson.title||"les").toLowerCase().replace(/[^a-z0-9]+/g,"-")+".html",result,"text/html;charset=utf-8")};
+$("export").onclick=()=>{save();
+ const source=document.documentElement.outerHTML;
+ const data=JSON.stringify(lesson).replace(/</g,"\\u003c");
+ let result=source.replace(/const SAMPLE=\{[\s\S]*?\};\nconst \$=/,"const SAMPLE="+data+";\nconst $=");
+ if(result===source){alert("Lesexport is niet gelukt.");return}
+ result=result.replace(/<main class="layout">/,'<main class="layout" style="display:none">');
+ const bootstrap='<style>body>header{display:none!important}.viewer{display:flex!important}</style><script>window.addEventListener("load",function(){document.getElementById("preview").click()})<\/script>';
+ result=result.replace(/<\/body>\s*<\/html>\s*$/i,bootstrap+'</body></html>');
+ download("wihtml-"+(lesson.title||"les").toLowerCase().replace(/[^a-z0-9]+/g,"-")+".html",result,"text/html;charset=utf-8")
+};
 render();
 </script>
 </body></html>
