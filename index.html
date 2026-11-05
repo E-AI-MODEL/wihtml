@@ -78,6 +78,21 @@
 .viewer.compact-slide .slide .choice{min-height:50px;padding:9px 12px}
 .timer-custom{display:flex;gap:7px;align-items:center;font-size:12px}
 .timer-custom input{width:52px;min-width:0;padding:5px 7px;border:1px solid #d3dcd4;border-radius:6px}
+
+/* Zelf te maken werkvormen, zonder extra permanente panelen. */
+.research-table-wrap{max-height:40vh;overflow:auto;margin:12px 0 10px;scrollbar-width:thin}
+.research-table{border-collapse:collapse;width:100%;font-size:clamp(14px,1.55vw,23px);table-layout:fixed}
+.research-table th{text-align:left;background:#eef3ef;font-size:.78em;color:#36584a}
+.research-table td,.research-table th{border-bottom:1px solid #dfe5df;padding:8px 13px}
+.research-table td:first-child{font-weight:650}
+.unknown-value{color:#a3ada4;font-weight:650}
+.learning-controls{display:flex;flex-wrap:wrap;gap:7px;margin:12px 0}
+.learning-controls button{font-size:13px}
+.practice-list{display:grid;gap:9px;max-height:46vh;overflow:auto}
+.practice-item{padding:11px 14px;border:1px solid #dce2dc;border-radius:8px;background:white}
+.practice-item strong{font-size:13px;color:#17695e}
+.practice-item p{font-size:clamp(15px,1.3vw,20px);margin:4px 0 8px}
+.practice-hint{background:#f6f1e5;border-left:3px solid #c99e46;padding:9px 12px;font-size:15px}
 </style>
 </head>
 <body>
@@ -234,7 +249,7 @@ $("templateFile").onchange=async e=>{
  }catch(err){$("templateError").textContent=err.message}finally{e.target.value=""}
 };
 
-const TYPES={text:"Tekst of opdracht",question:"Meerkeuzevraag",graph:"Onderzoek met grafiek",steps:"Uitwerking in stappen"};
+const TYPES={text:"Tekst of opdracht",question:"Meerkeuzevraag",graph:"Onderzoek met grafiek",steps:"Uitwerking in stappen",table:"Onderzoekstabel",practice:"Zelfstandig oefenen",compare:"Verklaren en vergelijken"};
 let lesson=deep(SAMPLE),selected=0,current=0,revealed=false,stepsVisible=0,drawTool="",paths={},rounds={},pollVisible=false,paletteVisible=false,graphHelp=false,black=false;
 let timerHandle=null,timerLeft=0,timerRunning=false;
 let undoStack=[];
@@ -256,7 +271,10 @@ function save(){
   s.correct=Number($("f-correct")?.value||0);s.later=!!$("f-later")?.checked;
  }
  if(nextType==="steps")s.steps=($("f-steps")?.value||"").split("\n").filter(Boolean);
- if(nextType==="graph"){s.g=Number($("f-g")?.value||1.06);s.b=Number($("f-b")?.value||1000)}
+ if(nextType==="table"){s.columnLabels=($("f-columnLabels")?.value||"Tijd | Hoeveelheid").split("|").map(x=>x.trim()).slice(0,2);s.tableRows=($("f-tableRows")?.value||"").split("\n").filter(x=>x.trim()).map(x=>x.split("|").map(v=>v.trim()).slice(0,2));s.tableExplanation=$("f-tableExplanation")?.value||""}
+ if(nextType==="practice"){s.tasks=($("f-tasks")?.value||"").split("\n").filter(x=>x.trim());s.hints=($("f-hints")?.value||"").split("\n");s.solutions=($("f-solutions")?.value||"").split("\n")}
+ if(nextType==="compare"){s.compareLabels=($("f-compareLabels")?.value||"Voor | Na").split("|").map(x=>x.trim()).slice(0,2);s.compareItems=($("f-compareItems")?.value||"").split("\n").filter(x=>x.trim()).map(x=>x.split("|").map(v=>v.trim()).slice(0,2));s.compareConclusion=$("f-compareConclusion")?.value||""}
+ if(nextType==="graph"){s.g=Number($("f-g")?.value||1.06);s.b=Number($("f-b")?.value||1000);s.target=Number($("f-target")?.value||2);s.graphExplanation=$("f-graphExplanation")?.value||""}
 }
 function renderEditor(){
  $("title").value=lesson.title;$("level").value=lesson.level;$("goal").value=lesson.goal;
@@ -266,7 +284,11 @@ function renderEditor(){
  const s=lesson.slides[selected];$("section-title").textContent="Lesdeel "+(selected+1);
  $("fields").innerHTML='<div class="form-grid"><div class="field"><label for="type">Soort</label><select id="type">'+Object.entries(TYPES).map(([k,v])=>'<option value="'+k+'" '+(s.type===k?'selected':'')+'>'+esc(v)+'</option>').join("")+'</select></div><div class="field"><label for="f-phase">Lesfase</label><input id="f-phase" value="'+esc(s.phase)+'"></div></div>'+
  field("title","Titel",s.title)+field("prompt","Vraag of instructie",s.prompt,true)+field("student","Wat doet de leerling zelf?",s.student,true)+field("teacher","Wat doet de docent?",s.teacher,true)+
- (s.type==="text"?field("body","Tekst",s.body,true):s.type==="question"?field("options","Antwoorden, één per regel",(s.options||[]).join("\n"),true)+field("correct","Index juiste antwoord (A=0, B=1, C=2, D=3)",s.correct||0)+field("explanation","Verklaring",s.explanation,true)+'<label class="hint"><input id="f-later" type="checkbox" '+(s.later?'checked':'')+'> Antwoord op een latere dia bespreken</label>':s.type==="steps"?field("steps","Stappen, één per regel",(s.steps||[]).join("\n"),true):field("g","Groeifactor",s.g)+field("b","Beginwaarde",s.b));
+ (s.type==="text"?field("body","Tekst",s.body,true):s.type==="question"?field("options","Antwoorden, één per regel",(s.options||[]).join("\n"),true)+field("correct","Index juiste antwoord (A=0, B=1, C=2, D=3)",s.correct||0)+field("explanation","Verklaring",s.explanation,true)+'<label class="hint"><input id="f-later" type="checkbox" '+(s.later?'checked':'')+'> Antwoord op een latere dia bespreken</label>':s.type==="steps"?field("steps","Stappen, één per regel",(s.steps||[]).join("\n"),true)
+ :s.type==="table"?field("columnLabels","Kolomnamen (gescheiden door |)",(s.columnLabels||["Tijd","Hoeveelheid"]).join(" | "))+field("tableRows","Tabelrijen: tijd | waarde, per regel",(s.tableRows||[["0","1000"],["12","2000"]]).map(x=>x.join(" | ")).join("\n"),true)+field("tableExplanation","Uitleg, pas na onderzoek tonen",s.tableExplanation||"",true)
+ :s.type==="practice"?field("tasks","Opgaven, één per regel",(s.tasks||["Bereken de verdubbelingstijd."]).join("\n"),true)+field("hints","Hulp per opgave, één per regel",(s.hints||[]).join("\n"),true)+field("solutions","Uitwerkingen per opgave, één per regel",(s.solutions||[]).join("\n"),true)
+ :s.type==="compare"?field("compareLabels","Namen van twee kolommen (|)",(s.compareLabels||["Eerst","Na onderzoek"]).join(" | "))+field("compareItems","Vergelijkingen, links | rechts, per regel",(s.compareItems||[["Voorspelling","Nieuwe verklaring"]]).map(x=>x.join(" | ")).join("\n"),true)+field("compareConclusion","Conclusie, pas onthullen",s.compareConclusion||"",true)
+ :field("g","Groeifactor",s.g)+field("b","Beginwaarde",s.b)+field("target","Doelfactor (2 voor verdubbelen; 0,5 voor halveren)",s.target??(Number(s.g)<1?.5:2))+field("graphExplanation","Uitleg na onderzoek",s.graphExplanation||"",true));
  $("type").onchange=()=>{const type=$("type").value;save();lesson.slides[selected].type=type;renderEditor()};
  review();
 }
@@ -278,6 +300,10 @@ function review(){
  for(const [i,s] of lesson.slides.entries()){
   if(!(s.student||"").trim())notes.push("Lesdeel "+(i+1)+": wat doet de leerling?");
   if(s.type==="question"&&(!s.options?.length||s.correct<0||s.correct>=s.options.length))notes.push("Lesdeel "+(i+1)+": controleer de antwoordopties.");
+  if(s.type==="table"&&!s.tableRows?.length)notes.push("Lesdeel "+(i+1)+": voeg tabelrijen toe.");
+  if(s.type==="practice"&&!s.tasks?.length)notes.push("Lesdeel "+(i+1)+": voeg opgaven toe.");
+  if(s.type==="compare"&&!s.compareItems?.length)notes.push("Lesdeel "+(i+1)+": voeg vergelijkingen toe.");
+  if(s.type==="graph"&&(s.g<=0||s.g===1||s.target<=0))notes.push("Lesdeel "+(i+1)+": controleer groeifactor en doelwaarde.");
  }
  $("review").innerHTML=notes.length?notes.map(t=>'<div class="review-item warn">'+esc(t)+'</div>').join(""):'<div class="review-item">Alle verplichte velden zijn ingevuld. Controleer zelf de wiskunde en de didactische keuzes.</div>';
 }
@@ -302,12 +328,47 @@ function loadRounds(){try{const raw=JSON.parse(localStorage.getItem(roundKey())|
 function persistRounds(){try{localStorage.setItem(roundKey(),JSON.stringify(rounds))}catch(e){/* opslag kan uitstaan */}}
 function voteRecord(id){return rounds[id]||(rounds[id]={first:null,second:null,draft:[0,0,0,0]})}
 function countTotal(values){return values.reduce((a,b)=>a+b,0)}
+
+let tableRevealed=0,compareRevealed=0,practiceState={};
+function tableView(s){
+ const names=s.columnLabels||["Tijd","Waarde"],data=s.tableRows||[];
+ return '<div class="research-table-wrap"><table class="research-table"><thead><tr><th>'+esc(names[0]||"Tijd")+'</th><th>'+esc(names[1]||"Waarde")+'</th></tr></thead><tbody>'+data.map((r,i)=>'<tr><td>'+esc(r[0]||"")+'</td><td>'+(i<tableRevealed?esc(r[1]||""):'<span class="unknown-value">?</span>')+'</td></tr>').join("")+'</tbody></table></div><div class="learning-controls"><button id="tableNext" class="small">Volgende waarde</button><button id="tableReset" class="small">Tabel weer afdekken</button><button id="tableExplain" class="small">Uitleg tonen</button></div>'+(revealed?'<div class="reveal">'+esc(s.tableExplanation||"")+'</div>':"");
+}
+function practiceView(s){
+ return '<div class="practice-list">'+(s.tasks||[]).map((task,i)=>'<article class="practice-item"><strong>Opgave '+(i+1)+'</strong><p>'+esc(task)+'</p><div class="learning-controls"><button class="small" data-hint="'+i+'">Hulp tonen</button><button class="small" data-solution="'+i+'">Uitwerking tonen</button></div>'+(practiceState[i]?.hint?'<div class="practice-hint">Hulp: '+esc((s.hints||[])[i]||"Geen hulp opgegeven.")+'</div>':"")+(practiceState[i]?.solution?'<div class="reveal">Uitwerking: '+esc((s.solutions||[])[i]||"Geen uitwerking opgegeven.")+'</div>':"")+'</article>').join("")+'</div>'
+}
+function compareView(s){
+ const labels=s.compareLabels||["Eerst","Na onderzoek"];
+ return '<div class="research-table-wrap"><table class="research-table"><thead><tr><th>'+esc(labels[0]||"Eerst")+'</th><th>'+esc(labels[1]||"Later")+'</th></tr></thead><tbody>'+(s.compareItems||[]).map((r,i)=>'<tr><td>'+esc(r[0]||"")+'</td><td>'+(i<compareRevealed?esc(r[1]||""):'<span class="unknown-value">?</span>')+'</td></tr>').join("")+'</tbody></table></div><div class="learning-controls"><button id="compareNext" class="small">Volgende vergelijking</button><button id="compareReset" class="small">Opnieuw</button><button id="compareConclusion" class="small">Conclusie tonen</button></div>'+(revealed?'<div class="reveal">'+esc(s.compareConclusion||"")+'</div>':"");
+}
+function bindLessonComponents(s){
+ if(s.type==="table"){
+  $("tableNext").disabled=tableRevealed>=(s.tableRows||[]).length;
+  $("tableNext").onclick=()=>{tableRevealed=Math.min((s.tableRows||[]).length,tableRevealed+1);renderSlide()};
+  $("tableReset").onclick=()=>{tableRevealed=0;revealed=false;renderSlide()};
+  $("tableExplain").onclick=()=>{revealed=!revealed;renderSlide()};
+ }
+ if(s.type==="compare"){
+  $("compareNext").disabled=compareRevealed>=(s.compareItems||[]).length;
+  $("compareNext").onclick=()=>{compareRevealed=Math.min((s.compareItems||[]).length,compareRevealed+1);renderSlide()};
+  $("compareReset").onclick=()=>{compareRevealed=0;revealed=false;renderSlide()};
+  $("compareConclusion").onclick=()=>{revealed=!revealed;renderSlide()};
+ }
+ if(s.type==="practice"){
+  $("slidecontent").querySelectorAll("[data-hint]").forEach(b=>b.onclick=()=>{const i=Number(b.dataset.hint);(practiceState[i]??={}).hint=!practiceState[i]?.hint;renderSlide()});
+  $("slidecontent").querySelectorAll("[data-solution]").forEach(b=>b.onclick=()=>{const i=Number(b.dataset.solution);(practiceState[i]??={}).solution=!practiceState[i]?.solution;renderSlide()});
+ }
+}
+
 function renderSlide(){
  const s=currentSlide();if(!s)return;
  $("slidecontent").innerHTML='<div class="eyebrow">'+esc(s.phase)+'</div><h2>'+esc(s.title)+'</h2><p class="lead">'+esc(s.prompt||"")+'</p>'+
  (s.type==="text"?'<p class="slide-text">'+esc(s.body||"")+'</p>':"")+
  (s.type==="question"?'<div class="choices">'+(s.options||[]).map((v,i)=>'<div class="choice"><b>'+String.fromCharCode(65+i)+'</b><span>'+esc(v)+'</span></div>').join("")+'</div>':"")+
  (s.type==="steps"?'<div id="stepList" class="step-list"></div><button class="step-next" id="stepNext">Volgende stap tonen</button>':"")+
+ (s.type==="table"?tableView(s):"")+
+ (s.type==="practice"?practiceView(s):"")+
+ (s.type==="compare"?compareView(s):"")+
  (s.type==="graph"?'<svg id="plot" class="graph" viewBox="0 0 820 285" role="img" aria-label="Exponentiële grafiek"></svg><div id="graphControls" class="graph-controls"><div class="ctrl-unit"><label for="graphG">Groeifactor <output id="graphGOut"></output></label><input id="graphG" type="range" min="0.70" max="1.40" step="0.005"></div><div class="ctrl-unit"><label for="graphB">Beginwaarde <output id="graphBOut"></output></label><input id="graphB" type="range" min="500" max="3000" step="100"></div><button id="graphLines" class="small">Hulplijnen</button></div><div id="graphResult" class="graph-result"></div>':"")+
  (s.type==="question"&&revealed&&!s.later?'<div class="reveal">'+esc(s.explanation||"")+'</div>':"")+
  (s.type==="graph"&&revealed&&lesson.slides.some(x=>x.later)?'<div class="reveal">De tijd tussen twee opeenvolgende verdubbelingen is even lang. De beginwaarde verandert die tijd niet.</div>':"");
@@ -324,6 +385,7 @@ function renderSlide(){
   $("stepNext").disabled=stepsVisible>=all.length;
   $("stepNext").onclick=()=>{if(stepsVisible<all.length){stepsVisible++;renderSlide()}};
  }
+ bindLessonComponents(s);
  if(pollVisible)renderPoll();
 }
 function graphRender(){
@@ -346,10 +408,10 @@ function openStage(){
  applyTemplate();stage.classList.add("show");stage.setAttribute("aria-hidden","false");loadRounds();renderSlide();
 }
 function closeStage(){stage.classList.remove("show");stage.setAttribute("aria-hidden","true");closeTools();stopTimer();stopStopwatch();$("spotlightOverlay")?.remove();$("curtainOverlay")?.remove();if(presenterInterval){clearInterval(presenterInterval);presenterInterval=null}}
-$("preview").onclick=()=>{save();current=0;revealed=false;stepsVisible=0;openStage()};
+$("preview").onclick=()=>{save();current=0;revealed=false;stepsVisible=0;tableRevealed=0;compareRevealed=0;practiceState={};openStage()};
 $("close").onclick=closeStage;
 $("prev").onclick=()=>move(-1);$("next").onclick=()=>move(1);
-function move(n){if(current+n<0||current+n>=lesson.slides.length)return;$("spotlightOverlay")?.remove();$("curtainOverlay")?.remove();current+=n;revealed=false;stepsVisible=0;graphHelp=false;drawTool="";canvas.classList.remove("armed");closeTools();renderSlide()}
+function move(n){if(current+n<0||current+n>=lesson.slides.length)return;tableRevealed=0;compareRevealed=0;practiceState={};$("spotlightOverlay")?.remove();$("curtainOverlay")?.remove();current+=n;revealed=false;stepsVisible=0;graphHelp=false;drawTool="";canvas.classList.remove("armed");closeTools();renderSlide()}
 function closeTools(){paletteVisible=false;$("toolpop").classList.remove("show");$("pollPanel")?.remove();$("comparePanel")?.remove();$("notesPanel")?.remove();$("timerPanel")?.remove();$("stopwatchPanel")?.remove();$("overviewPanel")?.remove();$("namesPanel")?.remove();pollVisible=false}
 $("toolbtn").onclick=()=>{paletteVisible=!paletteVisible;$("toolpop").classList.toggle("show",paletteVisible)};
 function floatPanel(id,title,body){const el=document.createElement("section");el.id=id;el.className="micro-panel";el.innerHTML='<div class="micro-head"><strong>'+esc(title)+'</strong><button class="small" data-dismiss="'+id+'" aria-label="Sluit '+esc(title)+'">×</button></div>'+body;stage.append(el);el.querySelector("[data-dismiss]").onclick=()=>{el.remove();if(id==="pollPanel")pollVisible=false};return el}
