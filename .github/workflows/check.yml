@@ -1,0 +1,42 @@
+name: Controleer WiHTML
+on:
+  push:
+    branches:
+      - 'feat/**'
+  pull_request:
+jobs:
+  static:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Controleer HTML en JavaScript
+        run: python3 tests/check_site.py
+  browser:
+    needs: static
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Installeer browsergereedschap
+        run: |
+          npm install --no-audit --no-fund
+          npx playwright install --with-deps chromium
+      - name: Test de les in Chromium
+        run: |
+          npm run test:browser
+          node tests/journey.mjs
+      - name: Bewaar screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wihtml-browserbeelden
+          path: test-results/
+          if-no-files-found: ignore
