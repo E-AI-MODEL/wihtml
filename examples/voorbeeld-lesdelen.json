@@ -1,0 +1,52 @@
+{
+  "titel": "Exponentiële groei",
+  "niveau": "5 havo",
+  "leerdoelen": [
+    "Ik kan een groeifactor bepalen.",
+    "Ik kan de verdubbelingstijd onderzoeken."
+  ],
+  "vlakverdeling": "left",
+  "functies": {
+    "stemmen": true,
+    "tekenen": true,
+    "timer": true
+  },
+  "lesdelen": [
+    {
+      "fase": "Voorspellen",
+      "type": "meerkeuze",
+      "titel": "Een voorspelling",
+      "vraag": "Hoelang duurt de volgende verdubbeling?",
+      "antwoorden": [
+        "Korter",
+        "Even lang",
+        "Langer"
+      ],
+      "juisteAntwoord": "B",
+      "laterBespreken": true,
+      "leerlingactiviteit": "Kies zelf en licht je keuze toe."
+    },
+    {
+      "fase": "Onderzoeken",
+      "type": "grafiek",
+      "titel": "Onderzoek de groei",
+      "vraag": "Verander de beginwaarde. Wat valt op?",
+      "groeifactor": 1.05,
+      "beginwaarde": 1000,
+      "doelfactor": 2,
+      "docentrol": "Bespreek pas na het onderzoek."
+    },
+    {
+      "fase": "Exit ticket",
+      "type": "oefenen",
+      "titel": "Zelf rekenen",
+      "opgaven": [
+        {
+          "vraag": "Bereken de verdubbelingstijd bij 5% groei.",
+          "hint": "Gebruik 1,05^t = 2.",
+          "uitwerking": "t ≈ 14,2 jaar."
+        }
+      ]
+    }
+  ]
+}
