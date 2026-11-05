@@ -354,6 +354,18 @@
 .design-paper[data-dark-theme="true"] .design-footer{color:#c6d7d0;border-top-color:#5b7568}
 .design-paper[data-dark-theme="true"] .design-object-title{color:#9be0c9}
 .design-paper[data-dark-theme="true"] .design-hint{color:#c6d7d0}
+
+@media(max-width:760px){
+ .top,.top .actions,.layout,.rail,.rail .slide-list,.editor,.design-studio,.design-toolbar,.design-viewport,.design-paper,.design-footer-actions,.side{min-width:0;max-width:100%;box-sizing:border-box}
+ .top{width:100%}
+ .top .actions{width:100%;justify-content:flex-start;flex-wrap:wrap}
+ .layout{width:100%;display:block}
+ .rail{width:100%;overflow:visible}
+ .rail .slide-list{display:flex;width:100%;overflow-x:auto;overflow-y:hidden;overscroll-behavior-inline:contain;scrollbar-width:thin}
+ .rail .slide-item{flex:0 0 178px;min-width:0}
+ .editor,.design-studio,.design-viewport,.design-paper{width:100%}
+ .design-paper .design-columns,.design-paper .design-main,.design-paper .design-body{min-width:0}
+}
 </style>
 </head>
 <body>
