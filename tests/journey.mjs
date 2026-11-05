@@ -68,6 +68,8 @@ try{
  assert.equal(await p.locator('#graphB').inputValue(),'80000');
  assert.match(await p.locator('#graphFormula').innerText(),/80.000/);
  assert.equal(await p.locator('#graphTabs button').count(),2);
+ assert.equal(await p.locator('#graphPollActions').isVisible(),false);
+ await p.locator('#toolbtn').click();assert.equal(await p.locator('[data-tool="pen"]').isVisible(),false);await p.locator('#toolbtn').click();
  // Slider keyboard input must not advance the slide.
  const position=await p.locator('#position').innerText();
  await p.locator('#graphB').focus();await p.keyboard.press('ArrowRight');
