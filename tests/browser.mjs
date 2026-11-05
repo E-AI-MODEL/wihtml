@@ -41,11 +41,36 @@ try {
   await page.locator("#templateHTML").fill('<div><script>alert(1)</script><div data-slot="content"></div><div data-slot="footer"></div></div>');
   await page.locator("#templateApply").click();
   assert.match(await page.locator("#templateError").innerText(), /niet toegestaan/i);
+  // Een sjabloon met twee buitenste elementen mag de huidige les niet beschadigen.
+  await page.locator("#templateHTML").fill('<section class="wi-shell"><div data-slot="content"></div></section><footer class="wi-bottom" data-slot="footer"></footer>');
+  await page.locator("#templateApply").click();
+  assert.match(await page.locator("#templateError").innerText(), /één buitenste HTML-element/);
+  assert.equal(await page.locator("#templateDialog").isVisible(), true);
+  // Een optionele faseplek moet ook in de echte presentatie ingevuld zijn.
+  await page.locator("#templateHTML").fill('<section class="wi-shell"><div class="wi-phase" data-slot="phase"></div><div class="wi-content" data-slot="content"></div><footer class="wi-bottom" data-slot="footer"></footer></section>');
+  await page.locator("#templateApply").click();
+  await page.locator("#preview").click();
+  assert.equal(await page.locator('.wi-shell [data-slot="phase"]').innerText(), "Voorspellen");
+  await page.locator("#close").click();
+  await page.locator("#editTemplate").click();
   await page.locator("#templatePreset").selectOption("editorial");
   await page.locator("#templateApply").click();
   await page.locator("#preview").click();
   await page.locator(".viewer.show").waitFor();
   assert.match(await page.locator("#slidecontent").innerText(), /€ 1.000 wordt € 2.000/);
+  await page.locator("#toolbtn").click();
+  await page.locator('[data-tool="black"]').click();
+  assert.equal(await page.locator("#blackMask").isVisible(), true);
+  assert.equal(await page.locator("#blackMask").evaluate(el=>getComputedStyle(el).backgroundColor), "rgb(5, 8, 7)");
+  await page.locator("#closeBlack").click();
+  assert.equal(await page.locator("#blackMask").count(), 0);
+  // Twee losse kopieën van de voorbeeldles delen geen stemopslag.
+  const sampleId = await page.evaluate(()=>lesson.id);
+  const secondSession = await browser.newPage();
+  await secondSession.goto(pathToFileURL(path.join(root, "index.html")).href);
+  const secondId = await secondSession.evaluate(()=>lesson.id);
+  assert.notEqual(sampleId, secondId);
+  await secondSession.close();
 
   await page.locator("#toolbtn").click();
   await page.locator('[data-tool="reveal"]').click();
