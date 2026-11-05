@@ -289,7 +289,7 @@ try {
   const [sampleJSON]=await Promise.all([imported.waitForEvent("download"),imported.locator("#jsonExample").click()]);
   const examplePath=path.join(os.tmpdir(),"wihtml-example.json");
   await sampleJSON.saveAs(examplePath);
-  assert.equal(JSON.parse(await fs.readFile(examplePath,"utf8")).lesdelen.length,3);
+  assert.equal(JSON.parse(await fs.readFile(examplePath,"utf8")).vragen.length,1);
 
   // Inhoud zonder dia-indeling, gevolgd door een andere lesroute. Geen lesdeel mag verdwijnen.
   const looseContent={
