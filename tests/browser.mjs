@@ -255,6 +255,7 @@ try {
   await builder.locator("#newLesson").click();
   assert.equal(await builder.locator("#title").inputValue(),"Nieuwe wiskundeles");
   assert.equal(await builder.locator("#items .slide-item").count(),4);
+  await builder.locator("#advancedFields > summary").click();
   await builder.locator("#add").click();
   await builder.locator("#type").selectOption("table");
   await builder.locator("#f-title").fill("Onderzoekstabel");
@@ -343,6 +344,7 @@ try {
   assert.equal(await imported.locator("#plot").count(),1);
   await imported.screenshot({path:path.join(screenshots,"json-en-vlakverdeling.png")});
   await imported.locator("#close").click();
+  await imported.locator("#advancedFields > summary").click();
   await imported.locator("#toolsSetup summary").click();
   await imported.locator('[data-feature="drawing"]').check();
   await imported.locator("#preview").click();
