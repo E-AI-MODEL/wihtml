@@ -118,7 +118,7 @@ function checkedTemplate(t){
   }
  }
  for(const slot of ["content","footer"])if(root.querySelectorAll('[data-slot="'+slot+'"]').length!==1)throw Error("Gebruik precies één data-slot='"+slot+"'.");
- if(/<\/?script|@import|@font-face|url\s*\(|expression\s*\(|[<>]|\\u|@|:has\s*\(|#[a-z]/i.test(t.css))throw Error("Deze CSS bevat niet-toegestane code.");
+ if(/<\/?script|@import|@font-face|url\s*\(|expression\s*\(|[<>]|\\u|@|:has\s*\(/i.test(t.css))throw Error("Deze CSS bevat niet-toegestane code.");
  if((t.css.match(/\{/g)||[]).length!==(t.css.match(/\}/g)||[]).length)throw Error("Controleer de accolades in de CSS.");
  const rules=t.css.match(/[^{}]+\{[^{}]*\}/g)||[];
  if(rules.join("").replace(/\s+/g,"")!==t.css.replace(/\s+/g,""))throw Error("CSS bevat tekst buiten regels.");
