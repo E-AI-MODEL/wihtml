@@ -461,9 +461,16 @@ try {
   phone.on("pageerror",e=>errors.push("mobile-editor: "+e.message));
   await phone.goto(pathToFileURL(path.join(root,"index.html")).href);
   await phone.locator("#designCanvas").waitFor();
-  const horizontalOverflow=await phone.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth);
-  assert.equal(horizontalOverflow<=2,true,"De visuele editor moet op mobiel binnen het scherm passen.");
+  const overflowReport=await phone.evaluate(()=>{
+    const width=window.innerWidth;
+    const offenders=[...document.querySelectorAll("body *")].filter(el=>{
+      const box=el.getBoundingClientRect();
+      return box.right>width+2&&getComputedStyle(el).display!=="none"&&box.width>0;
+    }).map(el=>({tag:el.tagName,id:el.id,classes:el.className?.toString().slice(0,90),right:Math.round(el.getBoundingClientRect().right),width:Math.round(el.getBoundingClientRect().width)})).slice(0,20);
+    return {overflow:document.documentElement.scrollWidth-width,offenders};
+  });
   await phone.screenshot({path:path.join(screenshots,"studio-mobiel.png"),fullPage:true});
+  assert.equal(overflowReport.overflow<=2,true,"De visuele editor moet op mobiel binnen het scherm passen: "+JSON.stringify(overflowReport));
   await phone.close();
 
   assert.deepEqual(errors, [], "JavaScript-fouten tijdens browsertest");
