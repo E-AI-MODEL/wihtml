@@ -386,7 +386,7 @@ try {
   await imported.locator("#import").setInputFiles({name:"inhoud-zonder-dia.json",mimeType:"application/json",buffer:Buffer.from(JSON.stringify(looseContent))});
   await imported.waitForFunction(() => document.querySelector("#title").value==="Inhoud zonder dia\'s" || document.querySelector("#status").textContent.startsWith("JSON niet ingelezen"), null, {timeout:10000});
   assert.equal(await imported.locator("#items .slide-item").count(),3);
-  assert.equal(await imported.locator("#title").inputValue(),"Inhoud zonder dia's");
+  assert.equal(await imported.locator("#title").inputValue(),"Inhoud zonder dia's",await imported.locator("#status").innerText());
   await imported.locator("#structureSetup summary").click();
   await imported.locator("#routePreset").selectOption("practice");
   await imported.locator("#applyRoute").click();
