@@ -417,8 +417,9 @@ try {
   await studio.locator("[data-design-layout='left']").click();
   assert.equal(await studio.locator("#designCanvas").getAttribute("data-design-layout"),"left");
   await studio.screenshot({path:path.join(screenshots,"studio-direct-bewerken.png"),fullPage:true});
+  const slidesBeforeCopy=await studio.locator("#items .slide-item").count();
   await studio.locator("#designCopy").click();
-  assert.equal(await studio.locator("#items .slide-item").count(),13);
+  assert.equal(await studio.locator("#items .slide-item").count(),slidesBeforeCopy+1);
   await studio.locator("#designType").selectOption("practice");
   await studio.locator("#designCanvas [data-design-array='tasks'][data-index='0']").fill("Bereken het bedrag na 12 jaar.");
   assert.match(await studio.locator("#f-tasks").inputValue(),/Bereken het bedrag na 12 jaar/);
