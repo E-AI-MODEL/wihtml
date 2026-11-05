@@ -165,6 +165,7 @@ try {
   ]);
   const exported = path.join(os.tmpdir(), "wihtml-export-browser-check.html");
   await download.saveAs(exported);
+  await fs.copyFile(exported,path.join(screenshots,"volledige-wihtml-export.html"));
   const contents = await fs.readFile(exported, "utf8");
   assert.match(contents, /classList.add\("standalone"\)/);
   assert.match(contents, /wi-shell/);
@@ -172,7 +173,55 @@ try {
   standalone.on("pageerror", e => errors.push("export: " + e.message));
   await standalone.goto(pathToFileURL(exported).href);
   await standalone.locator(".viewer.show").waitFor({ timeout: 10000 });
+  assert.match(await standalone.locator("#deckTitle").innerText(),/Verdubbelen en halveren/);
+  await standalone.locator('[data-answer-index="1"]').click();
+  assert.equal(await standalone.locator('.choice.selected').count(),1);
+  assert.equal(await standalone.locator("#questionReveal").count(),0);
+  await standalone.locator("#questionPoll").click();
+  await standalone.locator('#pollPanel [data-plus="1"]').click();
+  await standalone.locator("#saveRound1").click();
+  await standalone.locator("#pollPanel [data-dismiss]").click();
   await standalone.screenshot({ path: path.join(screenshots, "presentatie-export.png") });
+  await standalone.locator("#next").click();
+  assert.equal(await standalone.locator(".quiz-card").count(),3);
+  assert.equal(await standalone.locator(".quiz-feedback").count(),0);
+  await standalone.locator('[data-quiz="0"][data-choice="2"]').click();
+  assert.equal(await standalone.locator(".quiz-choice.selected").count(),1);
+  await standalone.locator("#quizRevealAll").click();
+  assert.equal(await standalone.locator(".quiz-feedback").count(),3);
+  await standalone.screenshot({ path: path.join(screenshots, "export-voorkennis-interactief.png") });
+  await standalone.locator("#next").click();
+  await standalone.locator("#next").click();
+  assert.equal(await standalone.locator("#graphTabs button").count(),4);
+  await standalone.locator('#graphTabs [data-exp="1"]').click();
+  assert.match(await standalone.locator("#graphScenarioTitle").innerText(),/beginwaarde/i);
+  await standalone.locator('#graphTabs [data-exp="2"]').click();
+  await standalone.locator("#graphLinear").click();
+  await standalone.locator("#graphMarks").click();
+  assert.equal(await standalone.locator("#graphLinear").getAttribute("aria-pressed"),"true");
+  assert.equal(await standalone.locator("#graphValues tr").count(),5);
+  await standalone.locator('#graphValues [data-time="2"]').click();
+  assert.match(await standalone.locator("#graphSelected").innerText(),/Gekozen meetpunt/);
+  await standalone.locator("#graphPollSecond").click();
+  assert.match(await standalone.locator("#pollPanel").innerText(),/€ 1.000 wordt € 2.000/);
+  await standalone.locator('#pollPanel [data-plus="0"]').click();
+  await standalone.locator("#saveRound2").click();
+  await standalone.locator("#compareVotes").click();
+  assert.match(await standalone.locator("#comparePanel").innerText(),/Eerst/);
+  assert.match(await standalone.locator("#comparePanel").innerText(),/Later/);
+  await standalone.locator("#comparePanel [data-dismiss]").click();
+  await standalone.locator("#pollPanel [data-dismiss]").click();
+  await standalone.screenshot({ path: path.join(screenshots, "export-vier-experimenten.png") });
+  for(let i=0;i<8;i++)await standalone.locator("#next").click();
+  assert.equal(await standalone.locator(".mistake-panel").count(),2);
+  assert.equal(await standalone.locator(".mistake-answer").count(),0);
+  await standalone.locator("#errorReveal").click();
+  assert.match(await standalone.locator(".mistake-answer").innerText(),/0,85/);
+  await standalone.screenshot({ path: path.join(screenshots, "export-zoek-de-fout.png") });
+  await standalone.locator("#next").click();
+  assert.equal(await standalone.locator(".practice-item").count(),3);
+  await standalone.locator('[data-solution="0"]').click();
+  assert.match(await standalone.locator(".practice-item").first().innerText(),/2,64 uur/);
   await standalone.close();
 
   await page.setViewportSize({ width: 390, height: 844 });
@@ -269,7 +318,7 @@ try {
     vlakverdeling:"right",functies:{tekenen:false,stemmen:false,timer:true,spotlicht:false},
     lesdelen:[
       {fase:"Voorspellen",type:"meerkeuze",titel:"Wat denk je?",vraag:"Welke grafiek groeit sneller?",antwoorden:["A","B","C"],juisteAntwoord:"B",layout:"equal",leerlingactiviteit:"Kies zelf."},
-      {fase:"Onderzoeken",type:"grafiek",titel:"Onderzoek de groeifactor",vraag:"Varieer de beginwaarde.",groeifactor:1.05,beginwaarde:1000,doelfactor:2},
+      {fase:"Onderzoeken",type:"grafiek",titel:"Onderzoek de groeifactor",vraag:"Varieer de beginwaarde.",groeifactor:1.05,beginwaarde:1000,doelfactor:2,experimenten:[{naam:"Groeifactor 5%",vraag:"Hoe snel groeit het?",groeifactor:1.05,beginwaarde:1000,doelfactor:2},{naam:"Groeifactor 10%",vraag:"Wat verandert er?",groeifactor:1.10,beginwaarde:1000,doelfactor:2}]},
       {fase:"Exit ticket",type:"oefenen",titel:"Zelf rekenen",opgaven:[{vraag:"Bereken de verdubbelingstijd.",hint:"Gebruik de groeifactor.",uitwerking:"Ongeveer 14,2 jaar."}]}
     ]
   };
@@ -306,6 +355,9 @@ try {
   assert.equal(await importedStandalone.locator("#slidecontent .wi-layout.equal").count(),1);
   await importedStandalone.locator("#next").click();
   assert.equal(await importedStandalone.locator("#slidecontent .wi-layout.right").count(),1);
+  assert.equal(await importedStandalone.locator("#graphTabs button").count(),2);
+  await importedStandalone.locator('#graphTabs [data-exp="1"]').click();
+  assert.match(await importedStandalone.locator("#graphScenarioTitle").innerText(),/10%/);
   await importedStandalone.close();
   const initialTitle=await imported.locator("#title").inputValue();
   await imported.locator("#import").setInputFiles({name:"fout.json",mimeType:"application/json",buffer:Buffer.from(JSON.stringify({titel:"Fout",lesdelen:[{type:"onbekend",titel:"?"}]}))});
