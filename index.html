@@ -371,7 +371,7 @@ function renderSlide(){
  (s.type==="compare"?compareView(s):"")+
  (s.type==="graph"?'<svg id="plot" class="graph" viewBox="0 0 820 285" role="img" aria-label="Exponentiële grafiek"></svg><div id="graphControls" class="graph-controls"><div class="ctrl-unit"><label for="graphG">Groeifactor <output id="graphGOut"></output></label><input id="graphG" type="range" min="0.70" max="1.40" step="0.005"></div><div class="ctrl-unit"><label for="graphB">Beginwaarde <output id="graphBOut"></output></label><input id="graphB" type="range" min="500" max="3000" step="100"></div><button id="graphLines" class="small">Hulplijnen</button></div><div id="graphResult" class="graph-result"></div>':"")+
  (s.type==="question"&&revealed&&!s.later?'<div class="reveal">'+esc(s.explanation||"")+'</div>':"")+
- (s.type==="graph"&&revealed&&lesson.slides.some(x=>x.later)?'<div class="reveal">De tijd tussen twee opeenvolgende verdubbelingen is even lang. De beginwaarde verandert die tijd niet.</div>':"");
+ (s.type==="graph"&&revealed?'<div class="reveal">'+esc(s.graphExplanation||"Bespreek wat de grafiek laat zien.")+'</div>':"");
  $("slidefooter").textContent=lesson.level+"  ·  "+lesson.title;
  $("position").textContent=(current+1)+" / "+lesson.slides.length;
  $("prev").disabled=current===0;$("next").disabled=current===lesson.slides.length-1;
@@ -399,10 +399,12 @@ function graphRender(){
  let grid="",path=raw.map((n,i)=>(i===0?"M":"L")+x(maxT*i/240).toFixed(1)+","+y(n).toFixed(1)).join(" ");
  for(let i=0;i<=4;i++)grid+='<line x1="48" x2="805" y1="'+(257-i*55)+'" y2="'+(257-i*55)+'" stroke="#e5e9e5"/>';
  let guides="";
- const T=Math.log(g>=1?2:.5)/Math.log(g);
+ const factor=Number(currentSlide().target??(g>1?2:.5));
+ const reachable=g>0&&g!==1&&factor>0&&((g>1&&factor>1)||(g<1&&factor<1));
+ const T=reachable?Math.log(factor)/Math.log(g):NaN;
  if(graphHelp&&Number.isFinite(T)&&T>0){for(let i=1;i<=3;i++){const t=T*i;if(t>maxT)break;guides+='<line x1="'+x(t)+'" x2="'+x(t)+'" y1="'+y(b*g**t)+'" y2="257" stroke="#c96746" stroke-dasharray="5 5"/><circle cx="'+x(t)+'" cy="'+y(b*g**t)+'" r="5" fill="#c96746"/>'}}
  svg.innerHTML=grid+'<path d="M48 20 V257 H805" fill="none" stroke="#8d9891" stroke-width="2"/><path d="'+path+'" fill="none" stroke="#17695e" stroke-width="4"/>'+guides+'<text x="52" y="16" fill="#52635a" font-size="14">N = b × gᵗ</text><text x="754" y="278" font-size="12" fill="#52635a">tijd</text>';
- $("graphResult").textContent=graphHelp?((g>1?"Verdubbeling":"Halvering")+": "+T.toFixed(2).replace(".",",")+" tijdseenheden"):"Wat verandert er aan de tijd als je de beginwaarde wijzigt?";
+ $("graphResult").textContent=graphHelp?(reachable?"Doelfactor "+factor.toLocaleString("nl-NL")+": "+T.toFixed(2).replace(".",",")+" tijdseenheden. "+(currentSlide().graphExplanation||""):"De gekozen doelfactor is niet bereikbaar met deze groeifactor."):"Wat verandert er aan de tijd als je de beginwaarde wijzigt?";
 }
 function openStage(){
  applyTemplate();stage.classList.add("show");stage.setAttribute("aria-hidden","false");loadRounds();renderSlide();
