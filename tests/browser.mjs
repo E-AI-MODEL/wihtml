@@ -329,6 +329,7 @@ try {
     ]
   };
   await imported.locator("#import").setInputFiles({name:"externe-lesinhoud.json",mimeType:"application/json",buffer:Buffer.from(JSON.stringify(externalJSON))});
+  await imported.waitForFunction(() => document.querySelector("#title").value==="Mijn exponentiële les" || document.querySelector("#status").textContent.startsWith("JSON niet ingelezen"), null, {timeout:10000});
   assert.equal(await imported.locator("#title").inputValue(),"Mijn exponentiële les");
   assert.equal(await imported.locator("#items .slide-item").count(),3);
   assert.equal(await imported.locator("#defaultLayout").inputValue(),"right");
