@@ -324,6 +324,24 @@
 .slide-item.drop-target{box-shadow:inset 0 -3px 0 #147d70}
 @media(max-width:1100px){.layout{grid-template-columns:190px minmax(0,1fr);gap:17px;padding:18px}.side{grid-template-columns:1fr}.side #review{grid-column:1;grid-row:auto}}
 @media(max-width:760px){.layout{display:block;padding:12px 14px}.rail{position:static;max-height:none;padding:0;border-right:0;border-bottom:1px solid var(--line)}.rail .slide-list{display:flex;gap:8px;overflow-x:auto;max-height:none}.rail .slide-item{min-width:180px}.rail-bottom{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0}.rail-import{flex:1}.editor{margin-top:16px}.design-heading{align-items:start}.design-heading p{display:none}.design-toolbar{gap:7px}.design-type-control{min-width:150px}.design-layout-group{order:3;width:100%;justify-content:space-between}.design-layout-group button{flex:1}.design-viewport{padding:7px}.design-paper{min-height:300px;padding:16px}.design-paper .design-title{font-size:clamp(20px,4vw,29px)}.design-paper .design-prompt{font-size:13px}.design-paper[data-design-layout="equal"] .design-columns,.design-paper[data-design-layout="left"] .design-columns,.design-paper[data-design-layout="right"] .design-columns{grid-template-columns:1fr}.design-options{grid-template-columns:1fr}.side{display:block;padding:10px 0}.side #review{display:block}}
+
+.template-design-panel{margin:18px 0 20px;padding:0;border:0}
+.template-design-panel>.eyebrow{font-size:12px}
+.template-design-panel>.hint{margin:9px 0 14px}
+.template-visual-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 10px;margin:14px 0}
+.template-visual-grid label{display:flex;flex-direction:column;gap:7px;font-size:12px;font-weight:730;margin:0}
+.template-visual-grid input[type=color]{width:100%;height:40px;padding:3px;background:white;border-radius:7px;border:1px solid #d8dfda;cursor:pointer}
+.template-visual-grid select{width:100%;font-size:12px;min-height:40px}
+.template-visual-grid label:nth-child(n+4){grid-column:span 1}
+.template-code-details{border-top:1px solid #d6dfd7;padding:13px 0}
+.template-code-details summary{cursor:pointer;list-style:none;font-size:13px;font-weight:750;color:#254439}
+.template-code-details summary span{font-size:12px;font-weight:500;color:#738079;margin-left:8px}
+.template-code-details summary::after{content:"⌄";float:right}
+.template-code-details[open] summary::after{content:"⌃"}
+.template-code-details summary::-webkit-details-marker{display:none}
+.template-code-details label{margin-top:18px}
+.template-visual-grid label:has(select){grid-column:span 1}
+@media(max-width:520px){.template-visual-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.template-visual-grid label:nth-child(3){grid-column:span 2}}
 </style>
 </head>
 <body>
@@ -370,9 +388,19 @@
 <div class="template-settings">
 <label for="templateName">Naam van het sjabloon</label><input id="templateName" maxlength="90">
 <label for="templatePreset">Begin met een voorbeeld</label><select id="templatePreset"><option value="custom">Huidig sjabloon</option><option value="editorial">Rustig, licht</option><option value="board">Donker bord</option></select>
+<div class="template-design-panel"><div class="eyebrow">Vormgeving kiezen</div><p class="hint">Verander de kleuren, het lettertype en de ruimte op de dia. Rechts zie je meteen het resultaat.</p>
+<div class="template-visual-grid">
+<label>Achtergrond <input id="themeBg" type="color" value="#ffffff" aria-label="Achtergrondkleur"></label>
+<label>Tekstkleur <input id="themeText" type="color" value="#202826" aria-label="Tekstkleur"></label>
+<label>Accentkleur <input id="themeAccent" type="color" value="#17695e" aria-label="Accentkleur"></label>
+<label>Lettertype <select id="themeFont"><option value="system">Rustig en helder</option><option value="serif">Klassiek</option><option value="round">Rond en vriendelijk</option></select></label>
+<label>Witruimte <select id="themeSpace"><option value="normal">Normaal</option><option value="roomy">Ruim</option><option value="compact">Compact</option></select></label>
+</div><p class="hint">Deze keuzes veranderen alleen de vormgeving. De werkvormen blijven intact.</p>
+</div>
+<details id="templateCodeDetails" class="template-code-details"><summary>Zelf HTML en CSS bewerken <span>Voor gevorderden</span></summary>
 <label for="templateHTML">HTML-indeling</label><textarea id="templateHTML" spellcheck="false" rows="11" aria-describedby="templateHelp"></textarea>
 <p id="templateHelp" class="hint">Verplicht: <code>data-slot="content"</code> en <code>data-slot="footer"</code>. Gebruik HTML-elementen en klassen voor de opbouw. Scripts en externe bronnen worden niet toegestaan.</p>
-<label for="templateCSS">CSS voor je sjabloon</label><textarea id="templateCSS" spellcheck="false" rows="12"></textarea>
+<label for="templateCSS">CSS voor je sjabloon</label><textarea id="templateCSS" spellcheck="false" rows="12"></textarea></details>
 <div id="templateError" role="status" aria-live="polite"></div>
 <div class="template-actions"><button id="templatePreview">Voorbeeld vernieuwen</button><button id="templateImport">Sjabloon importeren</button><input id="templateFile" class="hide" type="file" accept=".json,.html"><button id="templateDownload">Download HTML-sjabloon</button><button id="templateDownloadJSON">Bewaar als JSON</button><button id="templateApply" class="primary">Gebruik dit sjabloon</button></div>
 </div><div class="template-preview-area"><div class="eyebrow">Voorvertoning</div><iframe id="templateFrame" sandbox="" title="Voorbeeld van het HTML-sjabloon"></iframe><p class="hint">De voorvertoning voert geen scripts uit. In de presentatie blijven de docenttools als overlays bovenop het sjabloon beschikbaar.</p></div></div>
@@ -441,12 +469,39 @@ function checkedTemplate(t){
  const cleaned=root.innerHTML;
  return {name:String(t.name||"Mijn sjabloon").slice(0,90),html:cleaned,css:t.css};
 }
+
+function themeFromCSS(css){
+ const prop=(name,defaultValue)=>{
+  const matches=[...css.matchAll(new RegExp('(?:^|[;{}\\s])'+name+'\\s*:\\s*([^;\\n}]+)','gi'))];
+  return matches.length?matches[0][1].trim():defaultValue;
+ };
+ const bg=prop('background(?:-color)?','#ffffff'),fg=prop('color','#202826');
+ const color=x=>/^#[0-9a-f]{6}$/i.test(x)?x.toLowerCase():'#ffffff';
+ $("themeBg").value=color(bg);
+ $("themeText").value=color(fg);
+ const accented=prop('--accent','#17695e');
+ $("themeAccent").value=/^#[0-9a-f]{6}$/i.test(accented)?accented.toLowerCase():'#17695e';
+ $("themeFont").value=/Georgia/i.test(css)?'serif':/Trebuchet/i.test(css)?'round':'system';
+ $("themeSpace").value=/padding\s*:\s*3[024]px/i.test(css)?'roomy':/padding\s*:\s*(?:0|8px)/i.test(css)?'compact':'normal';
+}
+function updateTemplateVisual(){
+ const bg=$("themeBg").value,textColor=$("themeText").value,accent=$("themeAccent").value;
+ const font=$("themeFont").value==='serif'?'Georgia, serif':$("themeFont").value==='round'?'Trebuchet MS, Arial, sans-serif':'system-ui, sans-serif';
+ const pad=$("themeSpace").value==='roomy'?'32px':$("themeSpace").value==='compact'?'8px':'18px';
+ $("templateCSS").value='.wi-shell { background: '+bg+'; color: '+textColor+'; --accent: '+accent+'; font-family: '+font+'; padding: '+pad+'; }\n'+
+  '.wi-content { background: '+bg+'; color: '+textColor+'; }\n'+
+  '.wi-bottom { border-top: 1px solid '+accent+'; margin-top: 12px; padding-top: 10px; color: '+textColor+'; }';
+ previewTemplate();
+}
+document.querySelectorAll('#themeBg,#themeText,#themeAccent,#themeFont,#themeSpace').forEach(el=>el.addEventListener('input',updateTemplateVisual));
+
 function makeTemplatePanel(){
  const current=lesson.template||TEMPLATE_PRESETS.editorial;
  $("templateName").value=current.name;
  $("templateHTML").value=current.html;
  $("templateCSS").value=current.css;
  $("templatePreset").value="custom";$("templateError").textContent="";
+ themeFromCSS(current.css);$("templateCodeDetails").open=false;
  previewTemplate();$("templateDialog").showModal();
 }
 function templateDraft(){return {name:$("templateName").value,html:$("templateHTML").value,css:$("templateCSS").value}}
@@ -478,7 +533,7 @@ $("editTemplate").onclick=makeTemplatePanel;
 $("closeTemplate").onclick=()=>$("templateDialog").close();
 $("templatePreset").onchange=()=>{
  const name=$("templatePreset").value;if(!TEMPLATE_PRESETS[name])return;
- const x=TEMPLATE_PRESETS[name];$("templateName").value=x.name;$("templateHTML").value=x.html;$("templateCSS").value=x.css;previewTemplate()
+ const x=TEMPLATE_PRESETS[name];$("templateName").value=x.name;$("templateHTML").value=x.html;$("templateCSS").value=x.css;themeFromCSS(x.css);previewTemplate()
 };
 $("templatePreview").onclick=previewTemplate;
 $("templateApply").onclick=()=>{
@@ -512,7 +567,7 @@ $("templateFile").onchange=async e=>{
    raw={name:page.title||"Mijn sjabloon",html:tpl.innerHTML,css:css.textContent};
   }else raw=JSON.parse(content);
   const x=checkedTemplate(raw);
-  $("templateName").value=x.name;$("templateHTML").value=x.html;$("templateCSS").value=x.css;previewTemplate();
+  $("templateName").value=x.name;$("templateHTML").value=x.html;$("templateCSS").value=x.css;themeFromCSS(x.css);previewTemplate();
   $("templateError").textContent="Sjabloon geopend. Kies 'Gebruik dit sjabloon' om het toe te passen.";
  }catch(err){$("templateError").textContent=err.message}finally{e.target.value=""}
 };
