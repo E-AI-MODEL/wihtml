@@ -444,7 +444,27 @@ try {
   await readBack.locator("#next").click();
   assert.match(await readBack.locator("#slidecontent").innerText(),/Controleer de groeifactor/);
   await readBack.close();
+  const savedLocally=await studio.evaluate(()=>{
+    try{return !!localStorage.getItem("wihtml:docentstudio:concept:v1")}catch(e){return false}
+  });
+  if(savedLocally){
+    const countBeforeRestore=await studio.locator("#items .slide-item").count();
+    await studio.reload();
+    studio.on("dialog", dialog=>dialog.accept());
+    await studio.locator("#draftRestore").click();
+    assert.equal(await studio.locator("#items .slide-item").count(),countBeforeRestore);
+    await studio.locator("#items [data-i='1']").click();
+    assert.match(await studio.locator("#designCanvas").innerText(),/Bereken het bedrag na 12 jaar/);
+  }
   await studio.close();
+  const phone=await browser.newPage({viewport:{width:390,height:844}});
+  phone.on("pageerror",e=>errors.push("mobile-editor: "+e.message));
+  await phone.goto(pathToFileURL(path.join(root,"index.html")).href);
+  await phone.locator("#designCanvas").waitFor();
+  const horizontalOverflow=await phone.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth);
+  assert.equal(horizontalOverflow<=2,true,"De visuele editor moet op mobiel binnen het scherm passen.");
+  await phone.screenshot({path:path.join(screenshots,"studio-mobiel.png"),fullPage:true});
+  await phone.close();
 
   assert.deepEqual(errors, [], "JavaScript-fouten tijdens browsertest");
   console.log("Browsertest geslaagd: editor, presentatie, stemrondes, pen, grafiek en HTML-export.");
