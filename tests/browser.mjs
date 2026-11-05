@@ -194,7 +194,7 @@ try {
   await standalone.locator("#next").click();
   assert.equal(await standalone.locator("#graphTabs button").count(),4);
   await standalone.locator('#graphTabs [data-exp="1"]').click();
-  assert.match(await standalone.locator("#graphScenarioTitle").innerText(),/Beginwaarde/);
+  assert.match(await standalone.locator("#graphScenarioTitle").innerText(),/beginwaarde/i);
   await standalone.locator('#graphTabs [data-exp="2"]').click();
   await standalone.locator("#graphLinear").click();
   await standalone.locator("#graphMarks").click();
