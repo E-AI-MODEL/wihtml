@@ -786,9 +786,9 @@ function chooseExperiment(index){
  const s=currentSlide(),list=availableExperiments(s);
  graphMode=Math.max(0,Math.min(list.length-1,index));
  graphActivePreset=list[graphMode];
- graphHelp=false;graphLinear=false;graphMarks=false;graphSelectedTime=null;graphMode=0;graphActivePreset=null;
+ graphHelp=false;graphLinear=false;graphMarks=false;graphSelectedTime=null;
  const g=$("graphG"),b=$("graphB");if(!g||!b)return;
- g.min=graphActivePreset.g<1?".600":"1.010";g.max=graphActivePreset.g<1?".995":"1.400";
+ g.min=graphActivePreset.g<1?".600":"1.010";g.max=graphActivePreset.g<1?".995":"1.400";g.step=".0001";
  g.value=graphActivePreset.g;b.value=graphActivePreset.b;
  $("graphTabs").innerHTML=list.map((v,i)=>'<button type="button" role="tab" aria-selected="'+String(i===graphMode)+'" data-exp="'+i+'" class="'+(i===graphMode?"active":"")+'">'+(i+1)+' · '+esc(v.label||"Experiment")+'</button>').join("");
  $("graphTabs").querySelectorAll("[data-exp]").forEach(btn=>btn.onclick=()=>chooseExperiment(Number(btn.dataset.exp)));
@@ -857,6 +857,7 @@ function bindLessonComponents(s){
 
 function renderSlide(){
  const s=currentSlide();if(!s)return;
+ stage.querySelector(".slide").dataset.type=s.type;
  $("slidecontent").innerHTML='<div class="eyebrow">'+esc(s.phase)+'</div><h2>'+esc(s.title)+'</h2><p class="lead">'+esc(s.prompt||"")+'</p>'+
  (s.type==="text"?'<p class="slide-text">'+esc(s.body||"")+'</p>':"")+
  (s.type==="question"?'<div class="choices">'+(s.options||[]).map((v,i)=>'<div class="choice"><b>'+String.fromCharCode(65+i)+'</b><span>'+esc(v)+'</span></div>').join("")+'</div>':"")+
@@ -909,7 +910,10 @@ function graphRender(){
  const g=Number($("graphG").value),b=Number($("graphB").value);
  $("graphGOut").textContent=g.toFixed(3).replace(".",",");
  $("graphBOut").textContent=b.toLocaleString("nl-NL");
- const tMax=g>1?Math.min(40,Math.max(12,Math.log(6)/Math.log(g))):40;
+ const factor=Number(graphActivePreset?.target??currentSlide().target??(g>1?2:.5));
+ const reachable=g>0&&g!==1&&factor>0&&((g>1&&factor>1)||(g<1&&factor<1));
+ const T=reachable?Math.log(factor)/Math.log(g):NaN;
+ const tMax=reachable?Math.min(600,Math.max(12,Math.ceil(4*T/5)*5)):40;
  const tValues=Array.from({length:241},(_,i)=>tMax*i/240);
  const exponential=t=>b*Math.pow(g,t),linear=t=>b+b*(g-1)*t;
  const yMax=Math.max(b*2,exponential(tMax)*1.07);
@@ -919,14 +923,11 @@ function graphRender(){
  const expPath=tValues.map((t,i)=>(i?"L":"M")+X(t).toFixed(1)+","+Y(exponential(t)).toFixed(1)).join(" ");
  const linearPoints=tValues.filter(t=>linear(t)>=0);
  const linearPath=linearPoints.map((t,i)=>(i?"L":"M")+X(t).toFixed(1)+","+Y(linear(t)).toFixed(1)).join(" ");
- const samples=Array.from({length:5},(_,i)=>Number.isFinite(Math.log((graphActivePreset?.target??(g>1?2:.5)))/Math.log(g))?Math.log(graphActivePreset?.target??(g>1?2:.5))/Math.log(g)*i:tMax*i/4).filter(t=>Number.isFinite(t)&&t>=0&&t<=tMax);
+ const samples=Array.from({length:5},(_,i)=>reachable?Math.min(tMax,T*i):tMax*i/4);
  let markerSVG="";
  if(graphMarks){
   for(const t of samples){markerSVG+='<circle cx="'+X(t).toFixed(1)+'" cy="'+Y(exponential(t)).toFixed(1)+'" r="5" fill="#17695e" stroke="white" stroke-width="2"/>'}
  }
- const factor=Number(graphActivePreset?.target??currentSlide().target??(g>1?2:.5));
- const reachable=g>0&&g!==1&&factor>0&&((g>1&&factor>1)||(g<1&&factor<1));
- const T=reachable?Math.log(factor)/Math.log(g):NaN;
  let guides="";
  if(graphHelp&&Number.isFinite(T)&&T>0){
   for(let i=1;i<=3;i++){const t=T*i;if(t>tMax)break;guides+='<line x1="'+X(t)+'" x2="'+X(t)+'" y1="'+Y(exponential(t))+'" y2="257" stroke="#c96746" stroke-dasharray="5 5"/><circle cx="'+X(t)+'" cy="'+Y(exponential(t))+'" r="5" fill="#c96746"/>'}
