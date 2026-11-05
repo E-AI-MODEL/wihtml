@@ -29,11 +29,47 @@
 .reveal{background:#edf3ef;border-left-color:#17695e;font-size:clamp(16px,1.45vw,23px)}.slide-footer{padding-top:12px}
 .viewer .slide{min-height:0}.slide #slidecontent{flex:1;min-height:0;overflow:auto;scrollbar-width:thin}
 @media(max-width:800px){.micro-panel{right:10px;top:16px}.graph-controls{gap:8px}.slide .lead{font-size:14px}.slide h2{font-size:clamp(18px,4vw,38px)}.choice{min-height:30px}.slide #slidecontent{overflow:auto}}
+
+/* De sjablooneditor is een tijdelijke werkruimte, niet zichtbaar tijdens het lesgeven. */
+.template-dialog{width:min(1220px,calc(100vw - 36px));height:min(92vh,860px);max-height:92vh;border:1px solid var(--line);border-radius:14px;padding:0;background:var(--paper);color:var(--ink);box-shadow:0 25px 100px #0005}
+.template-dialog::backdrop{background:rgba(8,15,12,.65)}
+.template-title{display:flex;justify-content:space-between;gap:20px;padding:23px 30px 15px;border-bottom:1px solid var(--line);background:#fff}
+.template-title h2{margin:5px 0}.template-title p{margin:0}
+.template-editor{display:grid;grid-template-columns:minmax(350px,1fr) minmax(360px,1.1fr);gap:0;height:calc(100% - 135px);overflow:hidden}
+.template-settings{padding:22px 27px;overflow:auto;border-right:1px solid var(--line)}
+.template-settings label{display:block;font-size:13px;font-weight:700;margin:15px 0 6px}
+.template-settings input,.template-settings textarea,.template-settings select{display:block;width:100%;padding:10px 11px;border:1px solid #cbd5cd;border-radius:6px;color:var(--ink);background:#fff}
+.template-settings textarea{font:12px/1.55 ui-monospace,Menlo,Consolas,monospace;resize:vertical;tab-size:2}
+.template-settings code{font-size:12px}
+.template-actions{display:flex;flex-wrap:wrap;gap:7px;margin:15px 0}
+.template-preview-area{padding:27px;overflow:auto;min-width:0;display:flex;flex-direction:column;gap:14px}
+#templateFrame{border:1px solid #d4ded5;border-radius:7px;background:#fff;aspect-ratio:16/9;width:100%;flex:none}
+#templateError{font-size:13px;color:#aa3d27;min-height:1.2em;margin-top:9px}
+#viewer .slide .wi-shell{display:flex;flex-direction:column;flex:1;min-height:0;height:100%;width:100%}
+#viewer .slide .wi-content{flex:1;min-height:0}
+#viewer .slide .wi-bottom{margin-top:auto}
+#viewer .slide .wi-content #slidecontent{height:100%}
+#viewer .slide .wi-bottom #slidefooter{margin-top:0}
+#viewer .slide .wi-shell [data-slot=phase]{font-size:12px}
+@media(max-width:900px){.template-editor{grid-template-columns:1fr;overflow:auto}.template-settings{border-right:0;border-bottom:1px solid var(--line)}.template-preview-area{min-height:290px}.template-title{padding:15px}}
 </style>
 </head>
 <body>
-<header><div class="top"><div class="brand"><span class="mark">w</span><div><div class="brandname">WiHTML</div><div class="byline">Wiskundelessen maken en presenteren</div></div></div><div class="actions"><button id="save">Bewaar lesbestand</button><button id="preview">Bekijk presentatie</button><button id="export" class="primary">Download HTML</button></div></div></header>
+<header><div class="top"><div class="brand"><span class="mark">w</span><div><div class="brandname">WiHTML</div><div class="byline">Wiskundelessen maken en presenteren</div></div></div><div class="actions"><button id="editTemplate" title="Maak je eigen HTML-sjabloon">Sjabloon maken</button><button id="save">Bewaar lesbestand</button><button id="preview">Bekijk presentatie</button><button id="export" class="primary">Download HTML</button></div></div></header>
 <main class="layout"><nav class="rail"><div class="rail-head"><span class="eyebrow">Lesverloop</span><span id="total" class="hint"></span></div><div id="items" class="slide-list"></div><div class="rail-bottom"><button id="add">+ Lesdeel toevoegen</button><label class="hint" style="display:block;margin-top:13px">Lesbestand openen <input type="file" accept=".json" id="import"></label></div></nav><section class="editor"><div class="eyebrow">Lesontwerp / Wiskunde</div><h1>Wat gaan leerlingen zelf ontdekken?</h1><p class="lede">Bepaal wat leerlingen voorspellen, onderzoeken en uitleggen. De presentatie volgt jouw keuzes. Antwoorden verschijnen pas wanneer jij ze laat zien.</p><div class="editor-block"><div class="form-grid"><div class="field"><label for="title">Les</label><input id="title"></div><div class="field"><label for="level">Niveau</label><input id="level"></div></div><div class="field"><label for="goal">Wat kunnen leerlingen na afloop zelfstandig?</label><textarea id="goal" rows="2"></textarea></div><div class="section-head"><strong id="section-title">Lesdeel</strong><div class="mini-actions"><button class="small" id="up" title="Omhoog">↑</button><button class="small" id="down" title="Omlaag">↓</button><button class="small" id="remove">Verwijder</button></div></div><div id="fields"></div><div class="status" id="status" aria-live="polite"></div></div></section><aside class="side"><span class="eyebrow">Ontwerpcheck</span><h2>Wat vraagt deze les?</h2><p class="hint">Deze opmerkingen zijn bedoeld om je les te controleren. Ze zeggen niet of leerlingen geleerd hebben.</p><div id="review"></div><div class="note"><strong>Presentatie en tools</strong>De les gebruikt vaste 16:9-verhoudingen. Het kleine gereedschapspalet verschijnt over de dia en verandert de indeling niet.</div><div class="note"><strong>Bewaren</strong>Je kunt de les als JSON bewaren en later weer inlezen. Stemrondes blijven op deze browser opgeslagen.</div></aside></main>
+<dialog id="templateDialog" aria-labelledby="templateHeading" class="template-dialog">
+<div class="template-title"><div><div class="eyebrow">Eigen sjabloon</div><h2 id="templateHeading">Ontwerp je lespagina</h2><p class="hint">Bepaal de indeling met HTML en de vormgeving met CSS. De lesinhoud en docenttools blijven werken.</p></div><button id="closeTemplate" aria-label="Sluit sjablooneditor">Sluiten</button></div>
+<div class="template-editor">
+<div class="template-settings">
+<label for="templateName">Naam van het sjabloon</label><input id="templateName" maxlength="90">
+<label for="templatePreset">Begin met een voorbeeld</label><select id="templatePreset"><option value="custom">Huidig sjabloon</option><option value="editorial">Rustig, licht</option><option value="board">Donker bord</option></select>
+<label for="templateHTML">HTML-indeling</label><textarea id="templateHTML" spellcheck="false" rows="11" aria-describedby="templateHelp"></textarea>
+<p id="templateHelp" class="hint">Verplicht: <code>data-slot="content"</code> en <code>data-slot="footer"</code>. Gebruik HTML-elementen en klassen voor de opbouw. Scripts en externe bronnen worden niet toegestaan.</p>
+<label for="templateCSS">CSS voor je sjabloon</label><textarea id="templateCSS" spellcheck="false" rows="12"></textarea>
+<div id="templateError" role="status" aria-live="polite"></div>
+<div class="template-actions"><button id="templatePreview">Voorbeeld vernieuwen</button><button id="templateImport">Sjabloon importeren</button><input id="templateFile" class="hide" type="file" accept=".json"><button id="templateDownload">Sjabloon exporteren</button><button id="templateApply" class="primary">Gebruik dit sjabloon</button></div>
+</div><div class="template-preview-area"><div class="eyebrow">Voorvertoning</div><iframe id="templateFrame" sandbox="" title="Voorbeeld van het HTML-sjabloon"></iframe><p class="hint">De voorvertoning voert geen scripts uit. In de presentatie blijven de docenttools als overlays bovenop het sjabloon beschikbaar.</p></div></div>
+</dialog>
 <div id="viewer" class="viewer" role="dialog" aria-label="Presentatie" aria-modal="true"><article class="slide"><div id="slidecontent"></div><svg class="draw" id="draw" viewBox="0 0 1200 675" preserveAspectRatio="none"></svg><div class="slide-footer" id="slidefooter"></div></article><div class="viewer-nav"><button id="prev" aria-label="Vorige dia">←</button><span id="position"></span><button id="next" aria-label="Volgende dia">→</button><button id="close" aria-label="Sluit presentatie">Sluiten</button></div><div class="floating"><div id="toolpop" class="toolpop"><button data-tool="pen">Pen aan / uit</button><button data-tool="undo">Laatste lijn weg</button><button data-tool="clear">Wis deze dia</button><button data-tool="vote">Stemmen tellen</button><button data-tool="compare">Stemrondes vergelijken</button><button data-tool="reveal">Antwoord tonen</button><button data-tool="timer">Aftelklok</button><button data-tool="notes">Docentnotities</button><button data-tool="black">Zwart scherm</button></div><button id="toolbtn" aria-label="Open docentgereedschap">✎</button></div></div>
 <script>
 const SAMPLE={title:"Verdubbelen en halveren",level:"5 havo · Wiskunde A",goal:"De leerling verklaart en berekent de verdubbelings- en halveringstijd en kan de groeifactor uit de tijd bepalen.",slides:[
@@ -54,6 +90,98 @@ const SAMPLE={title:"Verdubbelen en halveren",level:"5 havo · Wiskunde A",goal:
 const $=id=>document.getElementById(id);
 const esc=t=>String(t??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const deep=x=>JSON.parse(JSON.stringify(x));
+
+const TEMPLATE_PRESETS={
+ editorial:{
+  name:"Rustig, licht",
+  html:'<div class="wi-shell"><div class="wi-content" data-slot="content"></div><div class="wi-bottom" data-slot="footer"></div></div>',
+  css:'.wi-shell { background: #ffffff; color: #202826; }\n.wi-content { padding: 0; }\n.wi-bottom { border-top: 1px solid #dce2dc; margin-top: 14px; padding-top: 10px; color: #5e6b65; }'
+ },
+ board:{
+  name:"Donker bord",
+  html:'<div class="wi-shell wi-board"><div class="wi-content" data-slot="content"></div><div class="wi-bottom" data-slot="footer"></div></div>',
+  css:'.wi-shell { background: #182a26; color: #f4f7f4; padding: 18px; }\n.wi-content { color: #f4f7f4; }\n.wi-bottom { border-top: 1px solid #62746a; padding-top: 10px; color: #d0dbd3; }'
+ }
+};
+const TEMPLATE_TAGS=new Set(["DIV","SECTION","HEADER","FOOTER","MAIN","ARTICLE","ASIDE","SPAN","P","STRONG","EM","SMALL","HR","H1","H2","H3"]);
+function checkedTemplate(t){
+ if(!t||typeof t.html!=="string"||typeof t.css!=="string")throw Error("Het sjabloon bevat geen HTML en CSS.");
+ if(t.html.length>16000||t.css.length>15000)throw Error("Het sjabloon is te groot.");
+ const parsed=new DOMParser().parseFromString("<main id='templateRoot'>"+t.html+"</main>","text/html");
+ const root=parsed.getElementById("templateRoot");
+ for(const el of [...root.querySelectorAll("*")]){
+  if(!TEMPLATE_TAGS.has(el.tagName))throw Error("Element <"+el.tagName.toLowerCase()+"> is niet toegestaan.");
+  for(const a of [...el.attributes]){
+   if(a.name!=="class"&&a.name!=="data-slot")throw Error("Attribuut '"+a.name+"' is niet toegestaan.");
+   if(a.name==="class"&&!/^[\w\s-]*$/.test(a.value))throw Error("Gebruik eenvoudige klassennamen.");
+   if(a.name==="data-slot"&&!["content","footer","phase"].includes(a.value))throw Error("Onbekende plaatsaanduiding.");
+  }
+ }
+ for(const slot of ["content","footer"])if(root.querySelectorAll('[data-slot="'+slot+'"]').length!==1)throw Error("Gebruik precies één data-slot='"+slot+"'.");
+ if(/<\/?script|@import|@font-face|url\s*\(|expression\s*\(|[<>]|\\u|@|:has\s*\(|#[a-z]/i.test(t.css))throw Error("Deze CSS bevat niet-toegestane code.");
+ if((t.css.match(/\{/g)||[]).length!==(t.css.match(/\}/g)||[]).length)throw Error("Controleer de accolades in de CSS.");
+ const rules=t.css.match(/[^{}]+\{[^{}]*\}/g)||[];
+ if(rules.join("").replace(/\s+/g,"")!==t.css.replace(/\s+/g,""))throw Error("CSS bevat tekst buiten regels.");
+ const css=rules.map(rule=>{
+  const i=rule.indexOf("{"),selectors=rule.slice(0,i).trim().split(",").map(x=>x.trim()),body=rule.slice(i+1,-1);
+  if(selectors.some(sel=>!/^\.wi-[\w-]+(?:\s+\.wi-[\w-]+)*$/.test(sel)))throw Error("Gebruik CSS-klassen die beginnen met .wi-");
+  if(/position\s*:|z-index\s*:|pointer-events\s*:|display\s*:\s*none|filter\s*:|content\s*:|transform\s*:/i.test(body))throw Error("Gebruik geen positionering die de bediening kan bedekken.");
+  if(!/^[\w\s:;.,#()%+\-/'"!]*$/.test(body))throw Error("Ongeldige CSS-tekens.");
+  return selectors.map(sel=>"#viewer .slide "+sel).join(", ")+" { "+body+" }";
+ }).join("\n");
+ const cleaned=root.innerHTML;
+ return {name:String(t.name||"Mijn sjabloon").slice(0,90),html:cleaned,css};
+}
+function makeTemplatePanel(){
+ const current=lesson.template||TEMPLATE_PRESETS.editorial;
+ $("templateName").value=current.name;
+ $("templateHTML").value=current.html;
+ $("templateCSS").value=current.css;
+ $("templatePreset").value="custom";$("templateError").textContent="";
+ previewTemplate();$("templateDialog").showModal();
+}
+function templateDraft(){return {name:$("templateName").value,html:$("templateHTML").value,css:$("templateCSS").value}}
+function previewTemplate(){
+ try{
+  const x=checkedTemplate(templateDraft());
+  const demo=x.html.replace(/<([a-z]+)\s+([^>]*?)data-slot="content"([^>]*)><\/\1>/i,'<div class="wi-content"><div class="eyebrow">Onderzoeken</div><h2>Wanneer verdubbelt een hoeveelheid?</h2><p>Een spaarbedrag groeit van € 1.000 naar € 2.000.</p></div>').replace(/<([a-z]+)\s+([^>]*?)data-slot="footer"([^>]*)><\/\1>/i,'<footer class="wi-bottom">5 havo · Verdubbelen en halveren</footer>').replace(/<([a-z]+)\s+([^>]*?)data-slot="phase"([^>]*)><\/\1>/i,'<span>Onderzoeken</span>');
+  const scoped=x.css.replaceAll("#viewer .slide ","");
+  const doc='<!doctype html><html lang="nl"><meta charset="utf-8"><style>*{box-sizing:border-box}body{margin:0;font:16px/1.5 system-ui,sans-serif}.frame{aspect-ratio:16/9;padding:7%;display:flex;flex-direction:column}.wi-shell{display:flex;flex-direction:column;flex:1;height:100%}.wi-content{flex:1}.wi-bottom{margin-top:auto}h2{font:normal clamp(20px,3vw,40px)/1.16 Georgia,serif}.eyebrow{font-size:12px;letter-spacing:.13em}'+scoped+'</style><div class="frame">'+demo+'</div></html>';
+  $("templateFrame").srcdoc=doc;$("templateError").textContent="";
+ }catch(e){$("templateError").textContent=e.message}
+}
+function applyTemplate(){
+ const wrapper=$("viewer").querySelector(".slide");
+ const contents=$("slidecontent"),footer=$("slidefooter"),ink=$("draw");
+ const x=checkedTemplate(lesson.template||TEMPLATE_PRESETS.editorial);
+ const old=wrapper.querySelector(".wi-shell");if(old)old.remove();
+ const region=document.createElement("div");region.innerHTML=x.html;
+ const shell=region.firstElementChild;
+ if(!shell||region.children.length!==1)throw Error("Gebruik één buitenste HTML-element.");
+ const placeContent=shell.querySelector('[data-slot="content"]'),placeFooter=shell.querySelector('[data-slot="footer"]');
+ placeContent.append(contents);placeFooter.append(footer);
+ wrapper.insertBefore(shell,ink);
+ let style=$("templateStyles");if(!style){style=document.createElement("style");style.id="templateStyles";document.head.append(style)}
+ style.textContent=x.css;
+}
+$("editTemplate").onclick=makeTemplatePanel;
+$("closeTemplate").onclick=()=>$("templateDialog").close();
+$("templatePreset").onchange=()=>{
+ const name=$("templatePreset").value;if(!TEMPLATE_PRESETS[name])return;
+ const x=TEMPLATE_PRESETS[name];$("templateName").value=x.name;$("templateHTML").value=x.html;$("templateCSS").value=x.css;previewTemplate()
+};
+$("templatePreview").onclick=previewTemplate;
+$("templateApply").onclick=()=>{
+ try{lesson.template=checkedTemplate(templateDraft());$("templateDialog").close();applyTemplate();msg("Sjabloon toegepast op de les.");}catch(e){$("templateError").textContent=e.message}
+};
+$("templateDownload").onclick=()=>{
+ try{download("wihtml-sjabloon.json",JSON.stringify(checkedTemplate(templateDraft()),null,2),"application/json");$("templateError").textContent="Sjabloon opgeslagen."}catch(e){$("templateError").textContent=e.message}
+};
+$("templateImport").onclick=()=>$("templateFile").click();
+$("templateFile").onchange=async e=>{
+ try{const file=e.target.files[0];if(!file)return;const x=checkedTemplate(JSON.parse(await file.text()));$("templateName").value=x.name;$("templateHTML").value=x.html;$("templateCSS").value=x.css;previewTemplate()}catch(err){$("templateError").textContent=err.message}
+};
+
 const TYPES={text:"Tekst of opdracht",question:"Meerkeuzevraag",graph:"Onderzoek met grafiek",steps:"Uitwerking in stappen"};
 let lesson=deep(SAMPLE),selected=0,current=0,revealed=false,stepsVisible=0,drawTool="",paths={},rounds={},pollVisible=false,paletteVisible=false,graphHelp=false,black=false;
 let timerHandle=null,timerLeft=0,timerRunning=false;
@@ -113,7 +241,7 @@ $("import").onchange=async e=>{
  try{
   const file=e.target.files[0];if(!file)return;
   const doc=JSON.parse(await file.text());if(!Array.isArray(doc.slides)||!doc.slides.length)throw Error("Er staan geen lesdelen in dit bestand.");
-  lesson=doc;lesson.id=lesson.id||"les-"+Date.now();selected=0;renderEditor();msg("Lesbestand geopend.");
+  lesson=doc;lesson.id=lesson.id||"les-"+Date.now();lesson.template=checkedTemplate(lesson.template||TEMPLATE_PRESETS.editorial);selected=0;applyTemplate();renderEditor();msg("Lesbestand geopend.");
  }catch(err){msg("Lesbestand niet geopend: "+err.message)}
 };
 function currentSlide(){return lesson.slides[current]}
@@ -163,7 +291,7 @@ function graphRender(){
  $("graphResult").textContent=graphHelp?((g>1?"Verdubbeling":"Halvering")+": "+T.toFixed(2).replace(".",",")+" tijdseenheden"):"Wat verandert er aan de tijd als je de beginwaarde wijzigt?";
 }
 function openStage(){
- stage.classList.add("show");stage.setAttribute("aria-hidden","false");loadRounds();renderSlide();
+ applyTemplate();stage.classList.add("show");stage.setAttribute("aria-hidden","false");loadRounds();renderSlide();
 }
 function closeStage(){stage.classList.remove("show");stage.setAttribute("aria-hidden","true");closeTools();stopTimer()}
 $("preview").onclick=()=>{save();current=0;revealed=false;stepsVisible=0;openStage()};
@@ -235,6 +363,8 @@ $("export").onclick=()=>{
 };
 $("preview").title="Bekijk de les op het presentatiescherm";
 $("toolbtn").title="Docentgereedschap";
+lesson.template=checkedTemplate(lesson.template||TEMPLATE_PRESETS.editorial);
+applyTemplate();
 loadRounds();
 renderEditor();
 
