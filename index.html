@@ -654,13 +654,11 @@ function normalizeLessonJSON(input){
  };
 }
 const EXAMPLE_LESSON_JSON={
- titel:"Exponentiële groei",niveau:"5 havo",leerdoelen:["Ik kan een groeifactor bepalen.","Ik kan de verdubbelingstijd onderzoeken."],
- vlakverdeling:"single",functies:{stemmen:true,tekenen:true,timer:true},
- lesdelen:[
-  {fase:"Voorspellen",type:"meerkeuze",titel:"Een voorspelling",vraag:"Hoe lang duurt de volgende verdubbeling?",antwoorden:["Korter","Even lang","Langer"],juisteAntwoord:"B",laterBespreken:true,leerlingactiviteit:"Kies zelf en licht je keuze toe."},
-  {fase:"Onderzoeken",type:"grafiek",titel:"Onderzoek de groei",vraag:"Verander de beginwaarde. Wat valt op?",groeifactor:1.05,beginwaarde:1000,doelfactor:2,docentrol:"Bespreek de verklaring pas na het onderzoek."},
-  {fase:"Exit ticket",type:"oefenen",titel:"Zelf rekenen",vraag:"Werk zonder hulp.",opgaven:[{vraag:"Bereken de verdubbelingstijd bij 5% groei.",hint:"Gebruik 1,05^t = 2.",uitwerking:"t ≈ 14,2 jaar."}]}
- ]
+ titel:"Exponentiële groei",niveau:"5 havo",
+ leerdoelen:["Ik kan een groeifactor bepalen.","Ik kan de verdubbelingstijd onderzoeken."],
+ inhoud:[{titel:"Wat is exponentiële groei?",tekst:"Bij exponentiële groei wordt een hoeveelheid steeds met dezelfde factor vermenigvuldigd."}],
+ vragen:[{titel:"Wat verwacht je?",vraag:"Een bedrag verdubbelt iedere 12 jaar. Hoelang duurt de volgende verdubbeling?",antwoorden:["Korter","Even lang","Langer"],juisteAntwoord:"B",laterBespreken:true}],
+ opgaven:[{vraag:"Bereken de verdubbelingstijd bij 5% groei per jaar.",hint:"Gebruik 1,05^t = 2.",uitwerking:"t ≈ 14,2 jaar."}]
 };
 $("jsonExample").onclick=()=>download("voorbeeld-wihtml-lesinhoud.json",JSON.stringify(EXAMPLE_LESSON_JSON,null,2),"application/json");
 $("import").onchange=async e=>{
