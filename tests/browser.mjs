@@ -175,7 +175,7 @@ try {
   builder.on("dialog", d=>d.accept());
   await builder.locator("#newLesson").click();
   assert.equal(await builder.locator("#title").inputValue(),"Nieuwe wiskundeles");
-  assert.equal(await builder.locator("#items .slide-item").count(),3);
+  assert.equal(await builder.locator("#items .slide-item").count(),4);
   await builder.locator("#add").click();
   await builder.locator("#type").selectOption("table");
   await builder.locator("#f-title").fill("Onderzoekstabel");
@@ -290,6 +290,28 @@ try {
   const examplePath=path.join(os.tmpdir(),"wihtml-example.json");
   await sampleJSON.saveAs(examplePath);
   assert.equal(JSON.parse(await fs.readFile(examplePath,"utf8")).lesdelen.length,3);
+
+  // Inhoud zonder dia-indeling, gevolgd door een andere lesroute. Geen lesdeel mag verdwijnen.
+  const looseContent={
+    titel:"Inhoud zonder dia's",niveau:"5 havo",leerdoelen:["Groeifactor verklaren"],
+    inhoud:[{titel:"Lees de uitleg",tekst:"Exponentiële groei heeft een vaste groeifactor."}],
+    vragen:[{titel:"Voorspel",vraag:"Wat gebeurt er bij een grotere groeifactor?",antwoorden:["Sneller","Langzamer"],juisteAntwoord:"A"}],
+    opgaven:[{vraag:"Bereken de groeifactor.",hint:"Gebruik een verhouding.",uitwerking:"g=1,05"}]
+  };
+  await imported.locator("#import").setInputFiles({name:"inhoud-zonder-dia.json",mimeType:"application/json",buffer:Buffer.from(JSON.stringify(looseContent))});
+  assert.equal(await imported.locator("#items .slide-item").count(),3);
+  assert.equal(await imported.locator("#title").inputValue(),"Inhoud zonder dia's");
+  await imported.locator("#structureSetup summary").click();
+  await imported.locator("#routePreset").selectOption("practice");
+  await imported.locator("#applyRoute").click();
+  assert.equal(await imported.locator("#items .slide-item").count(),3);
+  assert.match(await imported.locator("#items").innerText(),/Lees de uitleg/);
+  assert.match(await imported.locator("#items").innerText(),/Voorspel/);
+  assert.match(await imported.locator("#items").innerText(),/Opgaven/);
+  await imported.locator("#preview").click();
+  assert.match(await imported.locator("#slidecontent").innerText(),/Exponentiële groei heeft een vaste groeifactor/);
+  await imported.locator("#close").click();
+
   await imported.close();
 
   assert.deepEqual(errors, [], "JavaScript-fouten tijdens browsertest");
