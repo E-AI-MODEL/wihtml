@@ -6,7 +6,7 @@ Een rustige editor voor interactieve wiskundelessen. De docent stelt de les same
 
 Open `index.html` in een browser. De editor bevat een voorbeeldles **Verdubbelen en halveren** (5 havo). Je kunt lesdelen bewerken, toevoegen, verwijderen en anders ordenen. Via **Bekijk presentatie** open je de leerlingweergave; via **Download HTML** maak je een zelfstandig lesbestand. Met **Bewaar lesbestand** maak je een JSON-bestand dat je later opnieuw kunt openen.
 
-Deze eerste versie is een proef, niet een volledig getest lesproduct. De oorspronkelijke Docentstudio v9 is in het gesprek ontwikkeld, maar nog niet als bronbestand in deze repository geïntegreerd. De proefversie bevat dus nog niet alle eerder gebouwde docentgereedschappen en stemrondefuncties.
+Deze versie bevat een compacte presentatietoolbox met pen, ongedaan maken, wissen per dia, docentnotities, afteltimer, stemteller en vergelijking van twee stemrondes. De antwoorden worden per vraag in deze browser bewaard. De volledige oorspronkelijke Docentstudio v9 is nog niet één-op-één in de repository opgenomen; andere gereedschappen moeten selectief worden overgenomen en getest.
 
 ## Ontwerp
 
@@ -25,13 +25,13 @@ De editor en presentatie hebben een eigen vormgeving. Een presentatiedia blijft 
 python3 tests/check_site.py
 ```
 
-Hiervoor is Node.js nodig om de JavaScript-syntaxis te controleren. De test is statisch. Controleer de bediening ook in een echte browser op laptop en digibord voordat je de les gebruikt.
+Hiervoor is Node.js nodig om de JavaScript-syntaxis te controleren. Er draait ook een automatische Chromium-test via GitHub Actions. Die controleert de presentatienavigatie, de eerste en tweede stemronde, tekenfuncties, de grafiek, mobiele bediening en het opnieuw openen van geëxporteerde HTML. De test is technisch: een docent moet de les ook nog op een echt digibord beoordelen.
 
 ## Volgende ontwikkeling
 
 - De oorspronkelijke les en Docentstudio v9 systematisch als regressiereferentie opnemen.
-- Twee opgeslagen stemrondes met vergelijking en terughalen in de presentatie.
-- Compacte tools voor timer, tekenen, ongedaan maken en wissen per dia.
+- De stemrondevergelijking verder uitwerken als lesoverstijgend, bruikbaar verslag zonder leerlinggegevens.
+- De overige Docentstudio-functies alleen overnemen waar die een concrete leshandeling helpen.
 - Wiskundige componenten losmaken van de lesgegevens en grafieken gericht testen.
 - De visuele stijl verder aanscherpen aan de hand van een concreet Figma-ontwerp.
 
