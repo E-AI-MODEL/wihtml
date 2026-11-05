@@ -198,6 +198,54 @@
 .graph-polls{display:flex;gap:7px;flex-wrap:wrap;margin:8px 0 3px}
 .graph-polls button{padding:8px 11px;font-size:12px}
 @media(max-width:810px){.graph-lab{grid-template-columns:1fr}.graph-tabs button{flex:1}.graph-plot-panel .graph{max-height:175px}}
+
+/* Geëxporteerde lessen krijgen weer een afzonderlijke digibordweergave, naar Docentstudio v9. */
+#viewer.viewer{display:none;flex-direction:column;justify-content:space-between;align-items:center;padding:0;background:#142530;gap:0}
+#viewer.viewer.show{display:flex}
+#viewer .deck-topbar{flex:none;width:100%;height:57px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 clamp(18px,3vw,50px);background:#101f2a;color:#f0f6f3;z-index:101}
+#viewer .deck-brand{display:flex;align-items:center;gap:12px;min-width:0}
+#viewer .deck-brand strong{font-size:clamp(14px,1.25vw,21px);font-weight:830;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#viewer .deck-brand small{color:#9fb7c4;font-size:11px;letter-spacing:.07em;white-space:nowrap}
+#viewer .deck-logo{display:grid;place-items:center;background:#dc6b46;border-radius:8px;width:31px;height:31px;color:#fff;font-weight:900;font-size:18px;flex:none}
+#viewer .deck-buttons{display:flex;align-items:center;gap:9px}
+#viewer .deck-buttons span{font-size:12px;color:#b3ccc8}
+#viewer .deck-buttons button{background:#253d4a;border:1px solid #526c78;color:#fff;padding:8px 11px;border-radius:7px;font-weight:700;font-size:12px}
+#viewer .deck-progress{width:100%;flex:none;height:4px;background:#33454b}
+#viewer #deckProgress{height:100%;background:#e16d45;transition:width .2s}
+#viewer .slide{flex:0 1 auto;width:min(1600px,calc((100dvh - 136px)*16/9),calc(100vw - 42px));max-height:calc(100dvh - 136px);height:auto;aspect-ratio:16/9;padding:clamp(24px,3.2vw,56px);overflow-y:auto;scrollbar-gutter:stable;box-shadow:0 25px 60px #0005;border-radius:3px;background:#fcfbf8;color:#182d3d;scroll-behavior:smooth}
+#viewer .slide h2{color:#172d3a;font-weight:860;font-size:clamp(27px,3.7vw,60px);letter-spacing:-.047em;line-height:1.07;margin:6px 0 18px}
+#viewer .slide .eyebrow{color:#0e7773;font-weight:850;letter-spacing:.14em;text-transform:uppercase}
+#viewer .slide .lead{color:#354b59;line-height:1.36}
+#viewer .slide .choices{gap:clamp(9px,1vw,17px);margin-top:15px}
+#viewer .slide .choice{background:white;text-align:left;border:1.5px solid #cfdbd5;padding:clamp(12px,1.5vw,22px);border-radius:12px;color:#182d3d;box-shadow:0 3px 18px #142a3206;font-weight:750;transition:border-color .15s,background-color .15s}
+#viewer .slide .choice:hover{border-color:#168075}
+#viewer .slide .choice.selected{border-color:#168075;background:#eaf7ef}
+#viewer .slide .choice.right{border-color:#15906e;background:#dff2e7}
+#viewer .slide .choice b{background:#1c5264;color:#fff;border-radius:8px;width:38px;height:38px;flex:none}
+#viewer .slide .reveal{background:#e6f4e9;border-left:4px solid #168075}
+#viewer .viewer-nav{position:relative;bottom:auto;left:auto;transform:none;z-index:103;width:100%;min-height:61px;flex:none;border-radius:0;background:#fcfbf8;box-shadow:none;border-top:1px solid #dfe5df;justify-content:flex-end;padding:9px clamp(18px,3vw,50px);gap:11px}
+#viewer .viewer-nav button{font-weight:750;padding:9px 15px;border-radius:8px}
+#viewer .viewer-nav #next{background:#172e3f;color:white}
+#viewer .floating{right:clamp(15px,3vw,45px);bottom:13px}
+#viewer .toolpop{width:210px;max-height:60vh;overflow:auto;gap:5px;border:1px solid #d6e1d9}
+#viewer .toolpop button{font-size:12px}
+#viewer .wi-content{min-height:0}
+.question-actions{display:flex;gap:10px;align-items:center;margin:15px 0;flex-wrap:wrap}
+.question-actions button{background:#e1ece7;color:#163c46;border:1px solid #d0e2d5;border-radius:9px;font-size:13px;font-weight:750;padding:10px 13px}
+.question-actions span{font-size:13px;color:#5b6d68}
+#viewer .slide[data-type="graph"] h2{font-size:clamp(24px,3vw,44px)}
+#viewer .slide[data-type="graph"]{padding:clamp(16px,2.1vw,30px)}
+@media(max-width:760px){
+ #viewer .deck-topbar{height:50px;padding:0 10px}
+ #viewer .deck-brand small,#viewer #deckPhase{display:none}
+ #viewer .deck-buttons button{font-size:11px;padding:7px}
+ #viewer .slide{width:calc(100vw - 14px);max-height:calc(100dvh - 118px);padding:clamp(14px,4vw,24px)}
+ #viewer .viewer-nav{min-height:59px;padding:7px 13px}
+ #viewer .slide .choices{grid-template-columns:1fr}
+ #viewer .slide .choice{padding:10px;min-height:48px}
+ #viewer .slide h2{font-size:clamp(24px,6vw,38px)}
+}
+@media print{#viewer .deck-topbar,#viewer .deck-progress,#viewer .viewer-nav{display:none!important}}
 </style>
 </head>
 <body>
@@ -233,7 +281,7 @@
 <div class="template-actions"><button id="templatePreview">Voorbeeld vernieuwen</button><button id="templateImport">Sjabloon importeren</button><input id="templateFile" class="hide" type="file" accept=".json,.html"><button id="templateDownload">Download HTML-sjabloon</button><button id="templateDownloadJSON">Bewaar als JSON</button><button id="templateApply" class="primary">Gebruik dit sjabloon</button></div>
 </div><div class="template-preview-area"><div class="eyebrow">Voorvertoning</div><iframe id="templateFrame" sandbox="" title="Voorbeeld van het HTML-sjabloon"></iframe><p class="hint">De voorvertoning voert geen scripts uit. In de presentatie blijven de docenttools als overlays bovenop het sjabloon beschikbaar.</p></div></div>
 </dialog>
-<div id="viewer" class="viewer" role="dialog" aria-label="Presentatie" aria-modal="true"><article class="slide"><div id="slidecontent"></div><svg class="draw" id="draw" viewBox="0 0 1200 675" preserveAspectRatio="none"></svg><div class="slide-footer" id="slidefooter"></div></article><div class="viewer-nav"><button id="prev" aria-label="Vorige dia">←</button><span id="position"></span><button id="next" aria-label="Volgende dia">→</button><button id="close" aria-label="Sluit presentatie">Sluiten</button></div><div class="floating"><div id="toolpop" class="toolpop"><button data-tool="pen">Pen aan / uit</button><button data-tool="marker">Markeerstift</button><button data-tool="inkColor">Kleur kiezen</button><button data-tool="eraser">Gum (lijn aanraken)</button><button data-tool="stopPen">Pen wegleggen</button><button data-tool="undo">Laatste lijn weg</button><button data-tool="clear">Wis deze dia</button><button data-tool="vote">Stemmen tellen</button><button data-tool="compare">Stemrondes vergelijken</button><button data-tool="reveal">Antwoord tonen</button><button data-tool="timer">Aftelklok</button><button data-tool="stopwatch">Stopwatch</button><button data-tool="notes">Docentnotities</button><button data-tool="overview">Dia-overzicht</button><button data-tool="names">Leerling kiezen</button><button data-tool="fullscreen">Volledig scherm</button><button data-tool="presenter">Apart docentvenster</button><button data-tool="print">Print les</button><button data-tool="fit">Passend schalen</button><button data-tool="compact">Compacte dia</button><button data-tool="resetView">Herstel weergave</button><button data-tool="white">Wit scherm</button><button data-tool="spotlight">Spotlicht</button><button data-tool="curtain">Afdekken</button><button data-tool="black">Zwart scherm</button></div><button id="toolbtn" aria-label="Open docentgereedschap">✎</button></div></div>
+<div id="viewer" class="viewer" role="dialog" aria-label="Presentatie" aria-modal="true"><div class="deck-topbar"><div class="deck-brand"><span class="deck-logo">×2</span><strong id="deckTitle">Wiskundeles</strong><small id="deckLevel">Wiskunde</small></div><div class="deck-buttons"><span id="deckPhase">Voorspellen</span><button id="deckOverview" type="button">Dia-overzicht</button><button id="deckTools" type="button">Docenttools</button></div></div><div class="deck-progress"><div id="deckProgress"></div></div><article class="slide"><div id="slidecontent"></div><svg class="draw" id="draw" viewBox="0 0 1200 675" preserveAspectRatio="none"></svg><div class="slide-footer" id="slidefooter"></div></article><div class="viewer-nav"><button id="prev" aria-label="Vorige dia">←</button><span id="position"></span><button id="next" aria-label="Volgende dia">→</button><button id="close" aria-label="Sluit presentatie">Sluiten</button></div><div class="floating"><div id="toolpop" class="toolpop"><button data-tool="pen">Pen aan / uit</button><button data-tool="marker">Markeerstift</button><button data-tool="inkColor">Kleur kiezen</button><button data-tool="eraser">Gum (lijn aanraken)</button><button data-tool="stopPen">Pen wegleggen</button><button data-tool="undo">Laatste lijn weg</button><button data-tool="clear">Wis deze dia</button><button data-tool="vote">Stemmen tellen</button><button data-tool="compare">Stemrondes vergelijken</button><button data-tool="reveal">Antwoord tonen</button><button data-tool="timer">Aftelklok</button><button data-tool="stopwatch">Stopwatch</button><button data-tool="notes">Docentnotities</button><button data-tool="overview">Dia-overzicht</button><button data-tool="names">Leerling kiezen</button><button data-tool="fullscreen">Volledig scherm</button><button data-tool="presenter">Apart docentvenster</button><button data-tool="print">Print les</button><button data-tool="fit">Passend schalen</button><button data-tool="compact">Compacte dia</button><button data-tool="resetView">Herstel weergave</button><button data-tool="white">Wit scherm</button><button data-tool="spotlight">Spotlicht</button><button data-tool="curtain">Afdekken</button><button data-tool="black">Zwart scherm</button></div><button id="toolbtn" aria-label="Open docentgereedschap">✎</button></div></div>
 <script>
 const SAMPLE={title:"Verdubbelen en halveren",level:"5 havo · Wiskunde A",goal:"De leerling verklaart en berekent de verdubbelings- en halveringstijd en kan de groeifactor uit de tijd bepalen.",slides:[
 {id:"voorspel",type:"question",phase:"Voorspellen",title:"€ 1.000 wordt € 2.000. Dat duurt 12 jaar.",prompt:"Hoeveel tijd kost de groei van € 2.000 naar € 4.000?",options:["Minder dan 12 jaar","Precies 12 jaar","Meer dan 12 jaar","Dat kun je niet weten"],correct:1,explanation:"Bij dezelfde groeifactor blijft de verdubbelingstijd gelijk.",student:"Kiest eerst zelf en verklaart de keuze.",teacher:"Toont het antwoord pas na het experiment.",later:true},
@@ -768,7 +816,7 @@ function voteRecord(id){return rounds[id]||(rounds[id]={first:null,second:null,d
 function countTotal(values){return values.reduce((a,b)=>a+b,0)}
 
 let tableRevealed=0,compareRevealed=0,practiceState={};
-let quizSelections={},quizAnswersVisible=false,errorCorrectionVisible=false;
+let quizSelections={},quizAnswersVisible=false,errorCorrectionVisible=false,questionChoices={};
 let graphLinear=false,graphMarks=false,graphSelectedTime=null;
 
 let graphMode=0,graphActivePreset=null;
@@ -828,6 +876,14 @@ function mistakeView(s){
  return '<div class="mistake-grid"><section class="mistake-panel"><div class="eyebrow">Een leerling schrijft</div><p class="mistake-math">'+esc(s.wrong||"")+'</p><p class="mistake-question">'+esc(s.challenge||"Waar gaat dit mis?")+'</p></section><section class="mistake-panel feedback-panel"><div class="eyebrow">Wat zou jij verbeteren?</div><p>Zoek eerst zelf de fout. Schrijf de juiste aanpak op en bespreek je verklaring.</p><button id="errorReveal" type="button" class="small">'+(errorCorrectionVisible?"Verberg uitwerking":"Controleer de uitwerking")+'</button>'+(errorCorrectionVisible?'<p class="mistake-answer">'+esc(s.correction||"")+'</p>':"")+'</section></div>';
 }
 function bindLessonComponents(s){
+ if(s.type==="question"){
+  $("slidecontent").querySelectorAll("[data-answer-index]").forEach(btn=>btn.onclick=()=>{
+   questionChoices[s.id]=Number(btn.dataset.answerIndex);renderSlide();
+  });
+  if(s.later&&$("questionPoll"))$("questionPoll").onclick=()=>renderPoll(s.id);
+  if(!s.later&&$("questionReveal"))$("questionReveal").onclick=()=>{revealed=!revealed;renderSlide()};
+ }
+
  if(s.type==="table"){
   $("tableNext").disabled=tableRevealed>=(s.tableRows||[]).length;
   $("tableNext").onclick=()=>{tableRevealed=Math.min((s.tableRows||[]).length,tableRevealed+1);renderSlide()};
@@ -858,9 +914,13 @@ function bindLessonComponents(s){
 function renderSlide(){
  const s=currentSlide();if(!s)return;
  stage.querySelector(".slide").dataset.type=s.type;
+ $("deckTitle").textContent=lesson.title;
+ $("deckLevel").textContent=lesson.level;
+ $("deckPhase").textContent=s.phase||"";
+ $("deckProgress").style.width=((current+1)/lesson.slides.length*100)+"%";
  $("slidecontent").innerHTML='<div class="eyebrow">'+esc(s.phase)+'</div><h2>'+esc(s.title)+'</h2><p class="lead">'+esc(s.prompt||"")+'</p>'+
  (s.type==="text"?'<p class="slide-text">'+esc(s.body||"")+'</p>':"")+
- (s.type==="question"?'<div class="choices">'+(s.options||[]).map((v,i)=>'<div class="choice"><b>'+String.fromCharCode(65+i)+'</b><span>'+esc(v)+'</span></div>').join("")+'</div>':"")+
+ (s.type==="question"?'<div class="choices">'+(s.options||[]).map((v,i)=>'<button type="button" class="choice'+(questionChoices[s.id]===i?" selected":"")+(revealed&&!s.later&&s.correct===i?" right":"")+'" data-answer-index="'+i+'" aria-pressed="'+String(questionChoices[s.id]===i)+'"><b>'+String.fromCharCode(65+i)+'</b><span>'+esc(v)+'</span></button>').join("")+'</div><div class="question-actions">'+(s.later?'<button type="button" id="questionPoll">Tel klasstemmen</button><span>De verklaring volgt na het onderzoek.</span>':'<button type="button" id="questionReveal">'+(revealed?"Verberg antwoord":"Toon antwoord en uitleg")+'</button>')+'</div>':"")+
  (s.type==="steps"?'<div id="stepList" class="step-list"></div><button class="step-next" id="stepNext">Volgende stap tonen</button>':"")+
  (s.type==="table"?tableView(s):"")+
  (s.type==="practice"?practiceView(s):"")+
@@ -965,6 +1025,8 @@ $("prev").onclick=()=>move(-1);$("next").onclick=()=>move(1);
 function move(n){if(current+n<0||current+n>=lesson.slides.length)return;tableRevealed=0;compareRevealed=0;practiceState={};quizSelections={};quizAnswersVisible=false;errorCorrectionVisible=false;$("spotlightOverlay")?.remove();$("curtainOverlay")?.remove();$("blackMask")?.remove();black=false;current+=n;revealed=false;stepsVisible=0;graphHelp=false;graphLinear=false;graphMarks=false;graphSelectedTime=null;graphMode=0;graphActivePreset=null;drawTool="";canvas.classList.remove("armed");closeTools();renderSlide()}
 function closeTools(){paletteVisible=false;$("toolpop").classList.remove("show");$("pollPanel")?.remove();$("comparePanel")?.remove();$("notesPanel")?.remove();$("timerPanel")?.remove();$("stopwatchPanel")?.remove();$("overviewPanel")?.remove();$("namesPanel")?.remove();pollVisible=false}
 $("toolbtn").onclick=()=>{paletteVisible=!paletteVisible;$("toolpop").classList.toggle("show",paletteVisible)};
+$("deckTools").onclick=()=>$("toolbtn").click();
+$("deckOverview").onclick=openOverview;
 function floatPanel(id,title,body){const el=document.createElement("section");el.id=id;el.className="micro-panel";el.innerHTML='<div class="micro-head"><strong>'+esc(title)+'</strong><button class="small" data-dismiss="'+id+'" aria-label="Sluit '+esc(title)+'">×</button></div>'+body;stage.append(el);el.querySelector("[data-dismiss]").onclick=()=>{el.remove();if(id==="pollPanel")pollVisible=false};return el}
 function renderPoll(pollSlideId){
  $("pollPanel")?.remove();const s=lesson.slides.find(v=>v.id===pollSlideId)||currentSlide(),rec=voteRecord(s.id);
