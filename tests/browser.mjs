@@ -21,6 +21,16 @@ try {
   await page.locator("#templatePreset").selectOption("board");
   await page.locator("#templatePreview").click();
   assert.equal(await page.locator("#templateError").innerText(), "");
+  const [templateDownload] = await Promise.all([
+    page.waitForEvent("download"),
+    page.locator("#templateDownload").click()
+  ]);
+  const templateFile = path.join(os.tmpdir(), "wihtml-template-test.html");
+  await templateDownload.saveAs(templateFile);
+  assert.match(await fs.readFile(templateFile,"utf8"), /wihtml-template/);
+  await page.locator("#templateImport").click();
+  await page.locator("#templateFile").setInputFiles(templateFile);
+  assert.match(await page.locator("#templateError").innerText(), /Sjabloon geopend/);
   await page.locator("#templateApply").click();
   assert.equal(await page.locator("#templateDialog").isVisible(), false);
   await page.locator("#preview").click();
@@ -55,6 +65,16 @@ try {
   assert.match(await page.locator("#comparePanel").innerText(), /Later/);
   await page.screenshot({ path: path.join(screenshots, "stemmen-desktop.png") });
 
+  await page.locator("#toolbtn").click();
+  await page.locator('[data-tool="overview"]').click();
+  assert.equal(await page.locator("#overviewPanel").isVisible(),true);
+  await page.locator("#overviewPanel [data-go='0']").click();
+  await page.locator("#toolbtn").click();
+  await page.locator('[data-tool="names"]').click();
+  await page.locator("#pickerNames").fill("Iris\nMo\nSam");
+  await page.locator("#chooseName").click();
+  assert.notEqual(await page.locator("#nameResult").innerText(), "Nog niemand gekozen");
+  await page.locator("#namesPanel [data-dismiss]").click();
   await page.locator("#toolbtn").click();
   await page.locator('[data-tool="pen"]').click();
   const rect = await page.locator("#draw").boundingBox();
