@@ -101,11 +101,69 @@
 .graph-time{border:0;background:none;padding:0;color:#17695e;text-decoration:underline;font-size:12px}
 #graphSelected{font-size:12px!important;line-height:1.35;max-width:200px;margin:0}
 #graphControls button[aria-pressed="true"]{background:#eaf2ee;border-color:#17695e;color:#17695e}
+
+/* Werkomgeving: instellingen zijn rustig gegroepeerd, niet als extra kaarten. */
+.lesson-setup{margin:22px 0 24px;border-top:1px solid var(--line)}
+.setup-section{border-bottom:1px solid var(--line);background:transparent}
+.setup-section summary{display:flex;gap:12px;align-items:center;cursor:pointer;padding:12px 2px;font-size:14px;font-weight:700;list-style:none}
+.setup-section summary::-webkit-details-marker{display:none}
+.setup-section summary::after{content:"+";margin-left:auto;font-size:22px;font-weight:400;color:var(--muted)}
+.setup-section[open] summary::after{content:"−"}
+.setup-index{font-size:11px;letter-spacing:.02em;color:var(--accent);font-variant-numeric:tabular-nums}
+.setup-caption{font-size:12px;color:var(--muted);font-weight:400}
+.setup-inside{padding:0 0 18px 25px}
+.setup-inside label,.rail-import label{font-size:13px;font-weight:700}
+.setup-inside select{border:1px solid #cbd5cd;border-radius:7px;background:white;color:var(--ink);padding:9px 11px;font:inherit}
+.setup-inline{display:flex;align-items:center;flex-wrap:wrap;gap:10px}
+.setup-inline label{min-width:120px}
+.layout-picker{display:flex;align-items:center;gap:18px;margin-top:7px}
+.layout-mini{width:94px;height:42px;border:1px solid #d4ded7;background:#fff;display:flex;padding:4px;gap:4px;border-radius:5px}
+.layout-mini i{display:block;background:#e6eee9;flex:1;border:1px solid #c5d8ca;border-radius:2px}
+.layout-mini[data-layout="single"] i:nth-child(2){display:none}
+.layout-mini[data-layout="left"] i:first-child{flex:1.5}
+.layout-mini[data-layout="right"] i:nth-child(2){flex:1.5}
+.feature-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.feature-grid label{display:flex;align-items:center;gap:8px;font-weight:500}
+.feature-grid input{accent-color:var(--accent)}
+.rail-import{display:grid;gap:7px;border-top:1px solid var(--line);padding-top:16px;margin-top:14px}
+.rail-import input{width:100%;max-width:100%;font-size:12px}
+.rail-import .hint{margin:0}
+.wi-layout{display:grid;gap:clamp(13px,2vw,28px);align-items:start;min-height:0}
+.wi-layout.single{display:block}
+.wi-layout.equal{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.wi-layout.left{grid-template-columns:minmax(0,3fr) minmax(0,2fr)}
+.wi-layout.right{grid-template-columns:minmax(0,2fr) minmax(0,3fr)}
+.wi-layout .wi-lead-col,.wi-layout .wi-work-col{min-width:0}
+.wi-layout:not(.single) .choices{grid-template-columns:1fr}
+.wi-layout:not(.single) .graph{height:190px;min-height:130px}
+.wi-layout:not(.single) .graph-controls{gap:7px}
+.wi-layout:not(.single) .choice{min-height:42px}
+.wi-layout:not(.single) .wi-lead-col h2{font-size:clamp(23px,2.7vw,43px)}
+.wi-layout:not(.single) .wi-lead-col .lead{font-size:clamp(16px,1.55vw,24px)}
+.wi-layout:not(.single) .research-table-wrap,.wi-layout:not(.single) .practice-list{max-height:42vh}
+@media(max-width:700px){.setup-inside{padding-left:8px}.feature-grid{grid-template-columns:1fr}.wi-layout.equal,.wi-layout.left,.wi-layout.right{grid-template-columns:1fr}.layout-picker{flex-wrap:wrap}.setup-caption{display:none}}
 </style>
 </head>
 <body>
 <header><div class="top"><div class="brand"><span class="mark">w</span><div><div class="brandname">WiHTML</div><div class="byline">Wiskundelessen maken en presenteren</div></div></div><div class="actions"><button id="newLesson" title="Begin met een lege wiskundeles">Nieuwe les</button><button id="editTemplate" title="Maak je eigen HTML-sjabloon">Sjabloon maken</button><button id="save">Bewaar lesbestand</button><button id="preview">Bekijk presentatie</button><button id="export" class="primary">Download HTML</button></div></div></header>
-<main class="layout"><nav class="rail"><div class="rail-head"><span class="eyebrow">Lesverloop</span><span id="total" class="hint"></span></div><div id="items" class="slide-list"></div><div class="rail-bottom"><button id="add">+ Lesdeel toevoegen</button><label class="hint" style="display:block;margin-top:13px">Lesbestand openen <input type="file" accept=".json" id="import"></label></div></nav><section class="editor"><div class="eyebrow">Lesontwerp / Wiskunde</div><h1>Wat gaan leerlingen zelf ontdekken?</h1><p class="lede">Bepaal wat leerlingen voorspellen, onderzoeken en uitleggen. De presentatie volgt jouw keuzes. Antwoorden verschijnen pas wanneer jij ze laat zien.</p><div class="editor-block"><div class="form-grid"><div class="field"><label for="title">Les</label><input id="title"></div><div class="field"><label for="level">Niveau</label><input id="level"></div></div><div class="field"><label for="goal">Wat kunnen leerlingen na afloop zelfstandig?</label><textarea id="goal" rows="2"></textarea></div><div class="section-head"><strong id="section-title">Lesdeel</strong><div class="mini-actions"><button class="small" id="up" title="Omhoog">↑</button><button class="small" id="down" title="Omlaag">↓</button><button class="small" id="remove">Verwijder</button></div></div><div id="fields"></div><div class="status" id="status" aria-live="polite"></div></div></section><aside class="side"><span class="eyebrow">Ontwerpcheck</span><h2>Wat vraagt deze les?</h2><p class="hint">Deze opmerkingen zijn bedoeld om je les te controleren. Ze zeggen niet of leerlingen geleerd hebben.</p><div id="review"></div><div class="note"><strong>Presentatie en tools</strong>De les gebruikt vaste 16:9-verhoudingen. Het kleine gereedschapspalet verschijnt over de dia en verandert de indeling niet.</div><div class="note"><strong>Bewaren</strong>Je kunt de les als JSON bewaren en later weer inlezen. Stemrondes blijven op deze browser opgeslagen.</div></aside></main>
+<main class="layout"><nav class="rail"><div class="rail-head"><span class="eyebrow">Lesverloop</span><span id="total" class="hint"></span></div><div id="items" class="slide-list"></div><div class="rail-bottom"><button id="add">+ Lesdeel toevoegen</button><div class="rail-import"><label for="import">Upload JSON-lesinhoud</label><input type="file" accept=".json,application/json" id="import"><button id="jsonExample" class="small">Voorbeeld-JSON downloaden</button><p class="hint">Ook geschikt voor lesinhoud die buiten WiHTML is gemaakt.</p></div></div></nav><section class="editor"><div class="eyebrow">Lesontwerp / Wiskunde</div><h1>Wat gaan leerlingen zelf ontdekken?</h1><p class="lede">Upload je lesinhoud als JSON, kies de opbouw en de vormgeving. WiHTML maakt er een interactieve HTML-les van.</p>
+<div class="lesson-setup" aria-label="Lesinstellingen">
+ <details class="setup-section" id="structureSetup"><summary><span class="setup-index">01</span> Opbouw van de les <span class="setup-caption">Volgorde en lesroute</span></summary>
+ <div class="setup-inside"><p class="hint">Je kunt lesdelen links verplaatsen. Voor een nieuwe les kun je een vaste route gebruiken.</p>
+ <div class="setup-inline"><label for="routePreset">Kies een lesroute</label><select id="routePreset"><option value="own">Zelf samenstellen</option><option value="discover">Onderzoeken en verklaren</option><option value="explain">Uitleg en begeleid oefenen</option><option value="practice">Zelfstandig oefenen en controleren</option></select><button id="applyRoute" class="small">Maak opzet</button></div><p class="hint">Een nieuwe opzet vervangt de huidige lesdelen, na bevestiging.</p></div></details>
+ <details class="setup-section" id="layoutSetup"><summary><span class="setup-index">02</span> Verdeling van het scherm <span class="setup-caption">Van één vlak tot twee kolommen</span></summary>
+ <div class="setup-inside"><label for="defaultLayout">Standaard voor deze les</label><div class="layout-picker"><select id="defaultLayout"><option value="single">Eén vlak</option><option value="equal">Twee gelijke vlakken</option><option value="left">Links 60%, rechts 40%</option><option value="right">Links 40%, rechts 60%</option></select><div class="layout-mini" id="layoutDiagram" aria-hidden="true"><i></i><i></i></div></div><p class="hint">Per lesdeel kun je hiervan afwijken. In twee vlakken staan vraag en activiteit naast elkaar.</p></div></details>
+ <details class="setup-section" id="toolsSetup"><summary><span class="setup-index">03</span> Functies bij het lesgeven <span class="setup-caption">Kies wat de docent ziet</span></summary>
+ <div class="setup-inside feature-grid">
+ <label><input type="checkbox" data-feature="drawing"> Pen en markeerstift</label>
+ <label><input type="checkbox" data-feature="voting"> Stemmen en vergelijken</label>
+ <label><input type="checkbox" data-feature="clock"> Timer en stopwatch</label>
+ <label><input type="checkbox" data-feature="focus"> Spotlicht en afdekken</label>
+ <label><input type="checkbox" data-feature="picker"> Leerling kiezen</label>
+ <label><input type="checkbox" data-feature="notes"> Docentnotities</label>
+ <label><input type="checkbox" data-feature="printing"> Printen</label>
+ </div></details>
+</div><div class="editor-block"><div class="form-grid"><div class="field"><label for="title">Les</label><input id="title"></div><div class="field"><label for="level">Niveau</label><input id="level"></div></div><div class="field"><label for="goal">Wat kunnen leerlingen na afloop zelfstandig?</label><textarea id="goal" rows="2"></textarea></div><div class="section-head"><strong id="section-title">Lesdeel</strong><div class="mini-actions"><button class="small" id="up" title="Omhoog">↑</button><button class="small" id="down" title="Omlaag">↓</button><button class="small" id="remove">Verwijder</button></div></div><div id="fields"></div><div class="status" id="status" aria-live="polite"></div></div></section><aside class="side"><span class="eyebrow">Ontwerpcheck</span><h2>Wat vraagt deze les?</h2><p class="hint">Deze opmerkingen zijn bedoeld om je les te controleren. Ze zeggen niet of leerlingen geleerd hebben.</p><div id="review"></div><div class="note"><strong>Presentatie en tools</strong>De les gebruikt vaste 16:9-verhoudingen. Het kleine gereedschapspalet verschijnt over de dia en verandert de indeling niet.</div><div class="note"><strong>Bewaren</strong>Je kunt de les als JSON bewaren en later weer inlezen. Stemrondes blijven op deze browser opgeslagen.</div></aside></main>
 <dialog id="templateDialog" aria-labelledby="templateHeading" class="template-dialog">
 <div class="template-title"><div><div class="eyebrow">Eigen sjabloon</div><h2 id="templateHeading">Ontwerp je lespagina</h2><p class="hint">Bepaal de indeling met HTML en de vormgeving met CSS. De lesinhoud en docenttools blijven werken.</p></div><button id="closeTemplate" aria-label="Sluit sjablooneditor">Sluiten</button></div>
 <div class="template-editor">
@@ -291,7 +349,7 @@ function renderEditor(){
  document.querySelectorAll("[data-i]").forEach(b=>b.onclick=()=>{save();selected=Number(b.dataset.i);renderEditor()});
  const s=lesson.slides[selected];$("section-title").textContent="Lesdeel "+(selected+1);
  $("fields").innerHTML='<div class="form-grid"><div class="field"><label for="type">Soort</label><select id="type">'+Object.entries(TYPES).map(([k,v])=>'<option value="'+k+'" '+(s.type===k?'selected':'')+'>'+esc(v)+'</option>').join("")+'</select></div><div class="field"><label for="f-phase">Lesfase</label><input id="f-phase" value="'+esc(s.phase)+'"></div></div>'+
- field("title","Titel",s.title)+field("prompt","Vraag of instructie",s.prompt,true)+field("student","Wat doet de leerling zelf?",s.student,true)+field("teacher","Wat doet de docent?",s.teacher,true)+
+ '<div class="field"><label for="f-layout">Verdeling van deze dia</label><select id="f-layout"><option value="inherit">Gebruik lesinstelling</option><option value="single">Eén vlak</option><option value="equal">Twee gelijke vlakken</option><option value="left">Links 60%, rechts 40%</option><option value="right">Links 40%, rechts 60%</option></select></div>'+field("title","Titel",s.title)+field("prompt","Vraag of instructie",s.prompt,true)+field("student","Wat doet de leerling zelf?",s.student,true)+field("teacher","Wat doet de docent?",s.teacher,true)+
  (s.type==="text"?field("body","Tekst",s.body,true):s.type==="question"?field("options","Antwoorden, één per regel",(s.options||[]).join("\n"),true)+field("correct","Index juiste antwoord (A=0, B=1, C=2, D=3)",s.correct||0)+field("explanation","Verklaring",s.explanation,true)+'<label class="hint"><input id="f-later" type="checkbox" '+(s.later?'checked':'')+'> Antwoord op een latere dia bespreken</label>':s.type==="steps"?field("steps","Stappen, één per regel",(s.steps||[]).join("\n"),true)
  :s.type==="table"?field("columnLabels","Kolomnamen (gescheiden door |)",(s.columnLabels||["Tijd","Hoeveelheid"]).join(" | "))+field("tableRows","Tabelrijen: tijd | waarde, per regel",(s.tableRows||[["0","1000"],["12","2000"]]).map(x=>x.join(" | ")).join("\n"),true)+field("tableExplanation","Uitleg, pas na onderzoek tonen",s.tableExplanation||"",true)
  :s.type==="practice"?field("tasks","Opgaven, één per regel",(s.tasks||["Bereken de verdubbelingstijd."]).join("\n"),true)+field("hints","Hulp per opgave, één per regel",(s.hints||[]).join("\n"),true)+field("solutions","Uitwerkingen per opgave, één per regel",(s.solutions||[]).join("\n"),true)
