@@ -465,7 +465,7 @@ function review(){
  if(!lesson.slides.some(s=>(s.phase||"").toLowerCase().includes("exit")))notes.push("Maak een afsluiting die leerlingen zonder hulp uitvoeren.");
  for(const [i,s] of lesson.slides.entries()){
   if(!(s.student||"").trim())notes.push("Lesdeel "+(i+1)+": wat doet de leerling?");
-  if(s.type==="question"&&(!s.options?.length||s.correct<0||s.correct>=s.options.length))notes.push("Lesdeel "+(i+1)+": controleer de antwoordopties.");
+  if(s.type==="question"&&(s.options?.length<2||s.options?.length>4||s.correct<0||s.correct>=s.options.length))notes.push("Lesdeel "+(i+1)+": controleer 2 tot 4 antwoorden en de juiste keuze.");
   if(s.type==="table"&&!s.tableRows?.length)notes.push("Lesdeel "+(i+1)+": voeg tabelrijen toe.");
   if(s.type==="practice"&&!s.tasks?.length)notes.push("Lesdeel "+(i+1)+": voeg opgaven toe.");
   if(s.type==="compare"&&!s.compareItems?.length)notes.push("Lesdeel "+(i+1)+": voeg vergelijkingen toe.");
@@ -511,8 +511,13 @@ function asText(value){
  return "";
 }
 function asList(value){
- if(Array.isArray(value))return value.map(x=>asText(typeof x==="object"&&x!==null?(x.tekst??x.text??x.vraag??x.opgave??x.inhoud??""):x)).filter(x=>x.trim());
+ if(Array.isArray(value))return value.map(x=>asText(typeof x==="object"&&x!==null?(x.tekst??x.text??x.label??x.vraag??x.opgave??x.inhoud??""):x)).filter(x=>x.trim());
  if(typeof value==="string")return value.split("\n").map(x=>x.trim()).filter(Boolean);
+ return [];
+}
+function asAlignedList(value){
+ if(Array.isArray(value))return value.map(x=>asText(x));
+ if(typeof value==="string")return value.split("\n").map(x=>x.trim());
  return [];
 }
 function first(obj,keys,fallback){
@@ -598,7 +603,7 @@ function normalizeLessonJSON(input){
   if(type==="question"){
    const options=first(b,["options","antwoorden","keuzes"],[]);
    item.options=asList(options);
-   if(item.options.length<2||item.options.length>6)throw Error("Lesdeel "+(index+1)+": geef 2 tot 6 antwoorden op.");
+   if(item.options.length<2||item.options.length>4)throw Error("Lesdeel "+(index+1)+": geef 2 tot 4 antwoorden op.");
    const answer=first(b,["correct","juisteAntwoord","correctAnswer","juist"],-1);
    let correct=-1;
    if(typeof answer==="number"&&Number.isInteger(answer))correct=answer;
@@ -626,8 +631,8 @@ function normalizeLessonJSON(input){
   if(type==="practice"){
    const items=first(b,["tasks","opgaven","oefeningen"],[]);
    item.tasks=asList(items);
-   item.hints=asList(first(b,["hints","hulp"],[]));
-   item.solutions=asList(first(b,["solutions","uitwerkingen","oplossingen"],[]));
+   item.hints=asAlignedList(first(b,["hints","hulp"],[]));
+   item.solutions=asAlignedList(first(b,["solutions","uitwerkingen","oplossingen"],[]));
    if(Array.isArray(items)&&items.every(x=>x&&typeof x==="object")){
     item.hints=items.map(x=>asText(first(x,["hint","hulp"],"")));
     item.solutions=items.map(x=>asText(first(x,["solution","uitwerking","antwoord"],"")));
