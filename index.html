@@ -150,7 +150,7 @@
 <div class="lesson-setup" aria-label="Lesinstellingen">
  <details class="setup-section" id="structureSetup"><summary><span class="setup-index">01</span> Opbouw van de les <span class="setup-caption">Volgorde en lesroute</span></summary>
  <div class="setup-inside"><p class="hint">Je kunt lesdelen links verplaatsen. Voor een nieuwe les kun je een vaste route gebruiken.</p>
- <div class="setup-inline"><label for="routePreset">Kies een lesroute</label><select id="routePreset"><option value="own">Zelf samenstellen</option><option value="discover">Onderzoeken en verklaren</option><option value="explain">Uitleg en begeleid oefenen</option><option value="practice">Zelfstandig oefenen en controleren</option></select><button id="applyRoute" class="small">Maak opzet</button></div><p class="hint">Een nieuwe opzet vervangt de huidige lesdelen, na bevestiging.</p></div></details>
+ <div class="setup-inline"><label for="routePreset">Kies een lesroute</label><select id="routePreset"><option value="own">Zelf samenstellen</option><option value="discover">Onderzoeken en verklaren</option><option value="explain">Uitleg en begeleid oefenen</option><option value="practice">Zelfstandig oefenen en controleren</option></select><button id="applyRoute" class="small">Pas volgorde toe</button></div><p class="hint">De gekozen route ordent je lesdelen. Je lesinhoud blijft behouden.</p></div></details>
  <details class="setup-section" id="layoutSetup"><summary><span class="setup-index">02</span> Verdeling van het scherm <span class="setup-caption">Van één vlak tot twee kolommen</span></summary>
  <div class="setup-inside"><label for="defaultLayout">Standaard voor deze les</label><div class="layout-picker"><select id="defaultLayout"><option value="single">Eén vlak</option><option value="equal">Twee gelijke vlakken</option><option value="left">Links 60%, rechts 40%</option><option value="right">Links 40%, rechts 60%</option></select><div class="layout-mini" id="layoutDiagram" aria-hidden="true"><i></i><i></i></div></div><p class="hint">Per lesdeel kun je hiervan afwijken. In twee vlakken staan vraag en activiteit naast elkaar.</p></div></details>
  <details class="setup-section" id="toolsSetup"><summary><span class="setup-index">03</span> Functies bij het lesgeven <span class="setup-caption">Kies wat de docent ziet</span></summary>
@@ -329,11 +329,13 @@ function ensureSettings(){
  if(!LAYOUTS.has(lesson.layout))lesson.layout="single";
  const f=lesson.features&&typeof lesson.features==="object"?lesson.features:{};
  lesson.features=Object.fromEntries(Object.entries(FEATURE_DEFAULTS).map(([key,defaultValue])=>[key,typeof f[key]==="boolean"?f[key]:defaultValue]));
+ if(!["own","discover","explain","practice"].includes(lesson.route))lesson.route="own";
  for(const slide of lesson.slides||[])if(!LAYOUTS.has(slide.layout))slide.layout="inherit";
 }
 function syncSetup(){
  ensureSettings();
  $("defaultLayout").value=lesson.layout;
+ $("routePreset").value=lesson.route;
  $("layoutDiagram").dataset.layout=lesson.layout;
  document.querySelectorAll("[data-feature]").forEach(el=>el.checked=lesson.features[el.dataset.feature]!==false);
 }
@@ -376,14 +378,29 @@ const ROUTES={
  ]
 };
 function newRouteSlide(data,i){return {...data,id:"route-"+Date.now()+"-"+i+"-"+Math.random().toString(36).slice(2,6),student:"",teacher:"",layout:"inherit"}}
-$("applyRoute").onclick=()=>{
- const mode=$("routePreset").value;
- if(mode==="own"){msg("Voeg links zelf lesdelen toe en bepaal de volgorde.");return}
- const schema=ROUTES[mode];if(!schema)return;
- if(!confirm("Deze lesroute vervangt de huidige lesdelen. Bewaar je lesbestand eerst als je die wilt behouden."))return;
- save();lesson.slides=schema.map(newRouteSlide);selected=0;paths={};rounds={};lesson.id="les-"+Date.now()+"-"+Math.random().toString(36).slice(2,7);
- renderEditor();msg("De lesopzet staat klaar. Vul de eigen lesinhoud in.");
+
+const ROUTE_TYPES={
+ discover:["question","graph","table","compare","text","steps","practice"],
+ explain:["question","text","steps","practice","graph","table","compare"],
+ practice:["text","practice","table","compare","question","steps","graph"]
 };
+function reorderLessonSlides(slides,mode){
+ if(!ROUTE_TYPES[mode])return slides;
+ const order=ROUTE_TYPES[mode];
+ return slides.map((slide,i)=>({slide,i})).sort((a,b)=>{
+  const rank=x=>/exit|afsluit|eindcontrole/i.test(x.phase||"")?99:Math.max(0,order.indexOf(x.type));
+  return rank(a.slide)-rank(b.slide)||a.i-b.i;
+ }).map(x=>x.slide);
+}
+$("applyRoute").onclick=()=>{
+ save();
+ const mode=$("routePreset").value;
+ lesson.route=ROUTE_TYPES[mode]?mode:"own";
+ lesson.slides=reorderLessonSlides(lesson.slides,lesson.route);
+ selected=0;renderEditor();
+ msg(mode==="own"?"Je bepaalt zelf de volgorde links.":"Lesdelen opnieuw geordend. Alle inhoud is behouden.");
+};
+
 $("defaultLayout").onchange=()=>{
  lesson.layout=LAYOUTS.has($("defaultLayout").value)?$("defaultLayout").value:"single";
  $("layoutDiagram").dataset.layout=lesson.layout;
@@ -457,15 +474,16 @@ function review(){
  $("review").innerHTML=notes.length?notes.map(t=>'<div class="review-item warn">'+esc(t)+'</div>').join(""):'<div class="review-item">Alle verplichte velden zijn ingevuld. Controleer zelf de wiskunde en de didactische keuzes.</div>';
 }
 
+
 $("newLesson").onclick=()=>{
- if(!confirm("Een nieuwe les starten? Download eerst je huidige lesbestand als je de wijzigingen wilt bewaren."))return;
- lesson={id:"les-"+Date.now()+"-"+Math.random().toString(36).slice(2,8),title:"Nieuwe wiskundeles",level:"5 havo",goal:"",layout:"single",features:{...FEATURE_DEFAULTS},template:deep(TEMPLATE_PRESETS.editorial),slides:[
-  {id:"start-"+Date.now(),type:"question",phase:"Voorspellen",title:"Wat denk je?",prompt:"",options:["A","B","C","D"],correct:0,explanation:"",later:true,student:"",teacher:""},
-  {id:"onderzoek-"+Date.now(),type:"graph",phase:"Onderzoeken",title:"Onderzoek de grafiek",prompt:"",g:1.05,b:1000,target:2,graphExplanation:"",student:"",teacher:""},
-  {id:"exit-"+Date.now(),type:"practice",phase:"Exit ticket",title:"Laat zien wat je kunt",prompt:"Werk zonder hulp.",tasks:[""],hints:[],solutions:[],student:"",teacher:""}
- ]};
+ if(!confirm("Een nieuwe les starten? Bewaar eerst het huidige JSON-lesbestand als je verder wilt werken."))return;
+ const route=$("routePreset").value,selectedRoute=ROUTES[route]||ROUTES.discover;
+ lesson={id:"les-"+Date.now()+"-"+Math.random().toString(36).slice(2,8),title:"Nieuwe wiskundeles",level:"5 havo",goal:"",
+  route:ROUTE_TYPES[route]?route:"own",layout:$("defaultLayout").value,
+  features:Object.fromEntries([...document.querySelectorAll("[data-feature]")].map(el=>[el.dataset.feature,el.checked])),
+  template:deep(TEMPLATE_PRESETS.editorial),slides:selectedRoute.map(newRouteSlide)};
  selected=0;current=0;paths={};rounds={};tableRevealed=0;compareRevealed=0;practiceState={};
- applyTemplate();renderEditor();msg("Nieuwe les gestart. Vul de vragen en leerlingactiviteiten in.");
+ applyTemplate();renderEditor();msg("Nieuwe les gestart met de gekozen opzet. Vul de inhoud aan.");
 };
 
 $("add").onclick=()=>{save();lesson.slides.splice(selected+1,0,{id:"deel-"+Date.now(),type:"text",phase:"Oefenen",title:"Nieuw lesdeel",prompt:"",body:"",student:"",teacher:""});selected++;renderEditor()};
@@ -536,11 +554,24 @@ function normalizedFeatures(value){
 function normalizeLessonJSON(input){
  if(!input||typeof input!=="object")throw Error("Verwacht een JSON-object met lesinhoud.");
  const raw=Array.isArray(input)?{title:"Geïmporteerde les",slides:input}:input.lesson&&typeof input.lesson==="object"?input.lesson:input;
- const src=first(raw,["slides","lesdelen","onderdelen","sections","blocks"],undefined);
+ const src=first(raw,["slides","lesdelen","lesonderdelen","onderdelen","sections","blocks"],undefined);
+
  let blocks=src;
- if(!blocks&&raw.content&&typeof raw.content==="object")blocks=first(raw.content,["slides","lesdelen","sections","blocks"],undefined);
+ const nested=raw.content&&typeof raw.content==="object"&&!Array.isArray(raw.content)?raw.content:{};
+ if(!blocks)blocks=first(nested,["slides","lesdelen","lesonderdelen","sections","blocks"],undefined);
+ if(!blocks)blocks=first(raw,["inhoud"],undefined);
  if(!blocks&&typeof raw.content==="string")blocks=[{type:"text",title:"Lesinhoud",body:raw.content}];
- if(!Array.isArray(blocks)||!blocks.length)throw Error("Geen lesdelen gevonden. Gebruik 'lesdelen' of 'slides' als lijst.");
+ if(typeof blocks==="string")blocks=[{type:"text",title:"Lesinhoud",body:blocks}];
+ if(Array.isArray(blocks)&&Array.isArray(raw.vragen))blocks=[...blocks,...raw.vragen.map(q=>typeof q==="string"?{type:"text",title:"Vraag",prompt:q}: {...q,type:q.type||q.soort||(q.antwoorden||q.options?"question":"text")})];
+ if(Array.isArray(blocks)&&Array.isArray(raw.opgaven))blocks=[...blocks,{type:"practice",phase:"Oefenen",title:"Opgaven",tasks:raw.opgaven}];
+ if(!Array.isArray(blocks)){
+  blocks=[];
+  const explanation=first(raw,["uitleg","tekst","inhoud"],first(nested,["uitleg","tekst"],""));
+  if(typeof explanation==="string"&&explanation.trim())blocks.push({type:"text",phase:"Uitleg",title:"Lesinhoud",body:explanation});
+  if(Array.isArray(raw.vragen))blocks.push(...raw.vragen.map(q=>typeof q==="string"?{type:"text",title:"Vraag",prompt:q}: {...q,type:q.type||q.soort||(q.antwoorden||q.options?"question":"text")}));
+  if(Array.isArray(raw.opgaven))blocks.push({type:"practice",phase:"Oefenen",title:"Opgaven",tasks:raw.opgaven});
+ }
+ if(!blocks.length)throw Error("Geen lesinhoud gevonden. Gebruik 'lesdelen', 'inhoud', 'vragen' of 'opgaven'.");
  if(blocks.length>120)throw Error("Gebruik maximaal 120 lesdelen.");
  const knownIDs=new Set();
  const slides=blocks.map((block,index)=>{
@@ -618,7 +649,7 @@ function normalizeLessonJSON(input){
   title:asText(first(raw,["title","titel","onderwerp","topic"],"Nieuwe wiskundeles")),
   level:asText(first(raw,["level","niveau","leerjaar"],"Wiskunde")),
   goal:asText(first(raw,["goal","leerdoelen","doelen","objectives"],"")),
-  slides,layout:suppliedLayout||lesson.layout||"single",
+  slides,layout:suppliedLayout||lesson.layout||"single",route:lesson.route||"own",
   features:newFeatures,template
  };
 }
@@ -638,6 +669,8 @@ $("import").onchange=async e=>{
   if(file.size>2_000_000)throw Error("Het bestand is groter dan 2 MB.");
   const content=await file.text();
   const doc=normalizeLessonJSON(JSON.parse(content));
+  doc.route=$("routePreset").value;
+  doc.slides=reorderLessonSlides(doc.slides,doc.route);
   lesson=doc;selected=0;current=0;paths={};rounds={};revealed=false;
   tableRevealed=0;compareRevealed=0;practiceState={};
   applyTemplate();renderEditor();
