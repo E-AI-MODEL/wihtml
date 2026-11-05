@@ -37,6 +37,26 @@ Hiervoor is Node.js nodig om de JavaScript-syntaxis te controleren. Er draait oo
 
 Niet rechtstreeks naar `main` publiceren zonder review.
 
+## Zelf lesonderdelen bouwen
+
+De docent kan een nieuwe les starten met **Nieuwe les**, waarna de eigen les een unieke identificatie krijgt voor lokale stemrondes.
+
+De editor biedt zeven configureerbare onderdelen:
+
+| Onderdeel | Werking in de presentatie |
+| --- | --- |
+| Tekst of opdracht | Eigen tekst en uitleg |
+| Meerkeuzevraag | Stemmen tellen en antwoord later onthullen |
+| Grafiekonderzoek | Groeifactor, beginwaarde en doelfactor instellen; hulplijnen pas na keuze |
+| Stapsgewijze uitwerking | Docent onthult één stap tegelijk |
+| Onderzoekstabel | Leerlingen voorspellen waarden; docent onthult ze één voor één |
+| Zelfstandig oefenen | Opgaven, hulp en uitwerkingen afzonderlijk te tonen |
+| Verklaren en vergelijken | Twee kolommen met afgedekte informatie en een bespreekbare conclusie |
+
+De editor bewaart alle lesonderdelen in JSON en neemt ze mee in de zelfstandige HTML-export. De docent bepaalt welke onderdelen leerlingen eerst zonder hulp uitvoeren. Een ontwerpcontrole signaleert ontbrekende leerlingactiviteiten, maar beoordeelt niet automatisch de kwaliteit van een les.
+
+De originele volledig uitgewerkte v9-les blijft als apart voorbeeld beschikbaar in `examples/verdubbelen-halveren-v9.html`. De zeven algemene onderdelen dekken veel van de leshandelingen, maar zijn geen één-op-één vervanging voor elk specifiek rekeninstrument in v9.
+
 ## Docentstudio v9
 
 [Vergelijking met de originele Docentstudio v9](docs/docentstudio-v9.md): welke hulpmiddelen zijn overgenomen, welke nog ontbreken en hoe de sjabloonfunctie werkt. De lesinhoud en de docentoverlays blijven los van het HTML-sjabloon.
