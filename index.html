@@ -230,7 +230,7 @@ $("export").onclick=()=>{
  const result=source.replace(/const SAMPLE=\{[\s\S]*?\};\s*const \$=/,"const SAMPLE="+data+";\nconst $=");
  if(result===source){msg("Export mislukt: lesgegevens konden niet worden ingevoegd.");return}
  const boot='<style>html.standalone>body>header,html.standalone .layout{display:none!important}html.standalone .viewer{display:flex!important}</style><script>document.documentElement.classList.add("standalone");window.addEventListener("load",function(){document.getElementById("preview").click()});<\/script>';
- download("wihtml-"+(lesson.title||"les").toLowerCase().replace(/[^a-z0-9]+/g,"-")+".html",result.replace(/<\/body>/i,boot+"</body>"),"text/html;charset=utf-8");
+ download("wihtml-"+(lesson.title||"les").toLowerCase().replace(/[^a-z0-9]+/g,"-")+".html",result.slice(0,result.lastIndexOf("</body>"))+boot+result.slice(result.lastIndexOf("</body>")),"text/html;charset=utf-8");
  msg("Zelfstandige HTML opgeslagen.");
 };
 $("preview").title="Bekijk de les op het presentatiescherm";
