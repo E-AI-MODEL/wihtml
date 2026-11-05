@@ -258,6 +258,8 @@
 .design-heading{display:flex;justify-content:space-between;align-items:center;gap:24px;margin-bottom:14px}
 .design-heading h2{font:normal clamp(21px,2vw,28px)/1.15 Georgia,serif;letter-spacing:-.025em;margin:6px 0}
 .design-heading p{font-size:13px;color:var(--muted);margin:0}
+.design-heading-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.design-heading-actions button{font-size:12px}
 .design-play{background:#192f39;color:#fff;border-color:#192f39;white-space:nowrap;font-size:13px;font-weight:750}
 .design-play:hover{background:#2a4851;color:#fff}
 .design-toolbar{display:flex;align-items:end;gap:12px;flex-wrap:wrap;padding:11px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-bottom:15px}
@@ -359,7 +361,7 @@
 <main class="layout"><nav class="rail"><div class="rail-head"><span class="eyebrow">Lesverloop</span><span id="total" class="hint"></span></div><div id="items" class="slide-list"></div><div class="rail-bottom"><button id="add">+ Lesdeel toevoegen</button><div class="rail-import"><label for="import">Upload JSON-lesinhoud</label><input type="file" accept=".json,application/json" id="import"><button id="jsonExample" class="small">Voorbeeld-JSON downloaden</button><button id="draftRestore" class="small" hidden>Herstel mijn laatste concept</button><p class="hint">Je concept wordt alleen in deze browser bewaard. Download JSON om het elders te gebruiken.</p></div></div></nav><section class="editor"><div class="eyebrow">Lesontwerp / Wiskunde</div><h1>Wat gaan leerlingen zelf ontdekken?</h1><p class="lede">Upload je lesinhoud als JSON, kies de opbouw en de vormgeving. WiHTML maakt er een interactieve HTML-les van.</p>
 
 <section class="design-studio" aria-label="Dia direct bewerken">
- <div class="design-heading"><div><span class="eyebrow">Direct bewerken</span><h2 id="designHeading">Bewerk deze dia</h2><p>Klik op de inhoud om die aan te passen. Bekijk deze dia om alle interacties en de volledige vormgeving te testen.</p></div><button id="designPreview" class="design-play" type="button">Bekijk deze dia <span aria-hidden="true">↗</span></button></div>
+ <div class="design-heading"><div><span class="eyebrow">Direct bewerken</span><h2 id="designHeading">Bewerk deze dia</h2><p>Klik op de inhoud om die aan te passen. Bekijk deze dia om alle interacties en de volledige vormgeving te testen.</p></div><div class="design-heading-actions"><button id="designImport" type="button">Open JSON-bestand</button><button id="designPreview" class="design-play" type="button">Bekijk deze dia <span aria-hidden="true">↗</span></button></div></div>
  <div class="design-toolbar">
   <label class="design-type-control" for="designType"><span>Werkvorm</span><select id="designType" aria-label="Werkvorm van deze dia"></select></label>
   <div class="design-layout-group" role="group" aria-label="Verdeling van deze dia">
@@ -946,6 +948,7 @@ function initDesignControls(){
  $('designMoveDown').onclick=()=>{if(selected<lesson.slides.length-1)$('down').click()};
  $('designPreview').onclick=()=>{$('preview').click();current=selected;renderSlide()};
  $('designSettings').onclick=()=>{$('advancedFields').open=true;$('structureSetup').open=true;$('layoutSetup').open=true;$('toolsSetup').open=true;$('advancedFields').scrollIntoView({behavior:'smooth',block:'start'})};
+ $('designImport').onclick=()=>$('import').click();
  $('designTemplate').onclick=()=>$('editTemplate').click();
  $('designFields').onclick=()=>{$('advancedFields').open=true;document.querySelector('.editor-block').scrollIntoView({behavior:'smooth',block:'start'})};
 }
