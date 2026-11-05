@@ -346,7 +346,7 @@
 </head>
 <body>
 <header><div class="top"><div class="brand"><span class="mark">w</span><div><div class="brandname">WiHTML</div><div class="byline">Wiskundelessen maken en presenteren</div></div></div><div class="actions"><button id="newLesson" title="Begin met een lege wiskundeles">Nieuwe les</button><button id="editTemplate" title="Maak je eigen HTML-sjabloon">Sjabloon maken</button><button id="save">Bewaar lesbestand</button><button id="preview">Bekijk presentatie</button><button id="export" class="primary">Download HTML</button></div></div></header>
-<main class="layout"><nav class="rail"><div class="rail-head"><span class="eyebrow">Lesverloop</span><span id="total" class="hint"></span></div><div id="items" class="slide-list"></div><div class="rail-bottom"><button id="add">+ Lesdeel toevoegen</button><div class="rail-import"><label for="import">Upload JSON-lesinhoud</label><input type="file" accept=".json,application/json" id="import"><button id="jsonExample" class="small">Voorbeeld-JSON downloaden</button><p class="hint">Ook geschikt voor lesinhoud die buiten WiHTML is gemaakt.</p></div></div></nav><section class="editor"><div class="eyebrow">Lesontwerp / Wiskunde</div><h1>Wat gaan leerlingen zelf ontdekken?</h1><p class="lede">Upload je lesinhoud als JSON, kies de opbouw en de vormgeving. WiHTML maakt er een interactieve HTML-les van.</p>
+<main class="layout"><nav class="rail"><div class="rail-head"><span class="eyebrow">Lesverloop</span><span id="total" class="hint"></span></div><div id="items" class="slide-list"></div><div class="rail-bottom"><button id="add">+ Lesdeel toevoegen</button><div class="rail-import"><label for="import">Upload JSON-lesinhoud</label><input type="file" accept=".json,application/json" id="import"><button id="jsonExample" class="small">Voorbeeld-JSON downloaden</button><button id="draftRestore" class="small" hidden>Herstel mijn laatste concept</button><p class="hint">Je concept wordt alleen in deze browser bewaard. Download JSON om het elders te gebruiken.</p></div></div></nav><section class="editor"><div class="eyebrow">Lesontwerp / Wiskunde</div><h1>Wat gaan leerlingen zelf ontdekken?</h1><p class="lede">Upload je lesinhoud als JSON, kies de opbouw en de vormgeving. WiHTML maakt er een interactieve HTML-les van.</p>
 
 <section class="design-studio" aria-label="Dia direct bewerken">
  <div class="design-heading"><div><span class="eyebrow">De les zoals leerlingen die zien</span><h2 id="designHeading">Bewerk deze dia</h2><p>Pas de tekst direct op de dia aan. De inhoud wordt meegenomen in je HTML-bestand.</p></div><button id="designPreview" class="design-play" type="button">Bekijk deze dia <span aria-hidden="true">↗</span></button></div>
@@ -704,6 +704,41 @@ function save(){
  }
  if(nextType==="quizset"){s.questions=($("f-quizLines")?.value||"").split("\n").filter(x=>x.trim()).map(line=>{const cols=line.split("|").map(x=>x.trim());return {prompt:cols[0]||"",options:cols.slice(1,5),correct:cols[5]&&/^[A-D]$/i.test(cols[5])?cols[5].toUpperCase().charCodeAt(0)-65:-1,explanation:cols.slice(6).join(" | ")||""}})}
  if(nextType==="error"){s.wrong=$("f-wrong")?.value||"";s.challenge=$("f-challenge")?.value||"";s.correction=$("f-correction")?.value||""}
+ scheduleDraftSave();
+}
+
+
+const WIHTML_DRAFT_KEY='wihtml:docentstudio:concept:v1';
+let draftSaveTimer=null;
+function draftAvailable(){
+ try{return !!localStorage.getItem(WIHTML_DRAFT_KEY)}catch(e){return false}
+}
+function refreshDraftButton(){
+ const btn=$('draftRestore');if(btn)btn.hidden=!draftAvailable();
+}
+function scheduleDraftSave(){
+ if(document.documentElement.classList.contains('standalone'))return;
+ clearTimeout(draftSaveTimer);
+ draftSaveTimer=setTimeout(()=>{
+  try{
+   const value=JSON.stringify({savedAt:Date.now(),lesson});
+   if(value.length>900000){$('designSaved').textContent='Concept te groot voor browseropslag. Download je lesbestand.';return}
+   localStorage.setItem(WIHTML_DRAFT_KEY,value);
+   $('designSaved').textContent='Concept bewaard in deze browser';
+   refreshDraftButton();
+  }catch(e){$('designSaved').textContent='Opslaan in browser niet mogelijk. Download je lesbestand.'}
+ },550);
+}
+function restoreDraft(){
+ if(!confirm('Herstel je laatste lokale concept? De huidige les op het scherm wordt vervangen.'))return;
+ try{
+  const raw=localStorage.getItem(WIHTML_DRAFT_KEY),record=JSON.parse(raw);
+  if(!record||!record.lesson||!Array.isArray(record.lesson.slides)||!record.lesson.slides.length||record.lesson.slides.length>120)throw Error('Geen geldig concept gevonden.');
+  const next=record.lesson;next.template=checkedTemplate(next.template||TEMPLATE_PRESETS.editorial);
+  lesson=next;selected=0;current=0;tableRevealed=0;compareRevealed=0;practiceState={};
+  quizSelections={};quizAnswersVisible=false;errorCorrectionVisible=false;
+  applyTemplate();renderEditor();msg('Je concept is hersteld. Download JSON voor een eigen kopie.');
+ }catch(e){msg('Het concept kon niet worden geopend: '+e.message)}
 }
 
 /* Directe lesbewerking. Alle wijzigingen komen in dezelfde lesgegevens als de HTML-export. */
@@ -789,6 +824,7 @@ function designChanged(){
  if(item){const title=item.querySelector('strong'),phase=item.querySelector('em');if(title)title.textContent=slide.title||'Zonder titel';if(phase)phase.textContent=slide.phase||'Lesdeel';}
  $('designHeading').textContent='Dia '+(selected+1)+' · '+(slide.title||'Zonder titel');
  $('designSaved').textContent='Gewijzigd · bewaar je lesbestand';
+ scheduleDraftSave();
  review();
 }
 function renderDesigner(){
@@ -1603,8 +1639,12 @@ $("toolbtn").title="Docentgereedschap";
 lesson.template=checkedTemplate(lesson.template||TEMPLATE_PRESETS.editorial);
 applyTemplate();
 initDesignControls();
+$('draftRestore').onclick=restoreDraft;
+$('fields').addEventListener('input',event=>{if(event.target.id!=='type')save()});
+['title','level','goal'].forEach(id=>$(id).addEventListener('input',()=>{save();const footer=$('designCanvas').querySelector('.design-footer');if(footer)footer.textContent=(lesson.level||'Wiskunde')+' · '+(lesson.title||'Nieuwe les')+' · dia '+(selected+1)+' van '+lesson.slides.length}));
 loadRounds();
 renderEditor();
+refreshDraftButton();
 
 </script>
 </body></html>
