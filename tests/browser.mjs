@@ -121,6 +121,16 @@ try {
   assert.match(await page.locator("#slidecontent").innerText(), /Hoe lang duurt een verdubbeling/);
   await page.locator("#graphLines").click();
   assert.match(await page.locator("#graphResult").innerText(), /Verdubbeling/);
+  await page.locator("#graphLinear").click();
+  assert.equal(await page.locator("#graphLinear").getAttribute("aria-pressed"),"true");
+  await page.locator("#graphMarks").click();
+  assert.equal(await page.locator("#plot circle").count()>=5,true);
+  assert.equal(await page.locator("#graphValues tr").count(),5);
+  await page.locator('#graphValues [data-time="2"]').click();
+  assert.match(await page.locator("#graphSelected").innerText(),/Gekozen meetpunt/);
+  await page.locator("#graphReset").click();
+  assert.equal(await page.locator("#graphLinear").getAttribute("aria-pressed"),"false");
+
   await page.screenshot({ path: path.join(screenshots, "grafiek-desktop.png") });
   await page.locator("#close").click();
 
