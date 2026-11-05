@@ -169,7 +169,7 @@ function closeStage(){stage.classList.remove("show");stage.setAttribute("aria-hi
 $("preview").onclick=()=>{save();current=0;revealed=false;stepsVisible=0;openStage()};
 $("close").onclick=closeStage;
 $("prev").onclick=()=>move(-1);$("next").onclick=()=>move(1);
-function move(n){if(current+n<0||current+n>=lesson.slides.length)return;current+=n;revealed=false;stepsVisible=0;graphHelp=false;closeTools();renderSlide()}
+function move(n){if(current+n<0||current+n>=lesson.slides.length)return;current+=n;revealed=false;stepsVisible=0;graphHelp=false;drawTool="";canvas.classList.remove("armed");closeTools();renderSlide()}
 function closeTools(){paletteVisible=false;$("toolpop").classList.remove("show");$("pollPanel")?.remove();$("comparePanel")?.remove();$("notesPanel")?.remove();$("timerPanel")?.remove();pollVisible=false}
 $("toolbtn").onclick=()=>{paletteVisible=!paletteVisible;$("toolpop").classList.toggle("show",paletteVisible)};
 function floatPanel(id,title,body){const el=document.createElement("section");el.id=id;el.className="micro-panel";el.innerHTML='<div class="micro-head"><strong>'+esc(title)+'</strong><button class="small" data-dismiss="'+id+'" aria-label="Sluit '+esc(title)+'">×</button></div>'+body;stage.append(el);el.querySelector("[data-dismiss]").onclick=()=>{el.remove();if(id==="pollPanel")pollVisible=false};return el}
