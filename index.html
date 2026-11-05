@@ -543,7 +543,13 @@ function save(){
  if(nextType==="table"){s.columnLabels=($("f-columnLabels")?.value||"Tijd | Hoeveelheid").split("|").map(x=>x.trim()).slice(0,2);s.tableRows=($("f-tableRows")?.value||"").split("\n").filter(x=>x.trim()).map(x=>x.split("|").map(v=>v.trim()).slice(0,2));s.tableExplanation=$("f-tableExplanation")?.value||""}
  if(nextType==="practice"){s.tasks=($("f-tasks")?.value||"").split("\n").filter(x=>x.trim());s.hints=($("f-hints")?.value||"").split("\n");s.solutions=($("f-solutions")?.value||"").split("\n")}
  if(nextType==="compare"){s.compareLabels=($("f-compareLabels")?.value||"Voor | Na").split("|").map(x=>x.trim()).slice(0,2);s.compareItems=($("f-compareItems")?.value||"").split("\n").filter(x=>x.trim()).map(x=>x.split("|").map(v=>v.trim()).slice(0,2));s.compareConclusion=$("f-compareConclusion")?.value||""}
- if(nextType==="graph"){s.g=Number($("f-g")?.value||1.06);s.b=Number($("f-b")?.value||1000);s.target=Number($("f-target")?.value||2);s.graphExplanation=$("f-graphExplanation")?.value||""}
+ if(nextType==="graph"){
+  s.g=Number($("f-g")?.value||1.06);s.b=Number($("f-b")?.value||1000);s.target=Number($("f-target")?.value||2);s.graphExplanation=$("f-graphExplanation")?.value||"";
+  s.experiments=($("f-experiments")?.value||"").split("\n").filter(row=>row.trim()).map(row=>{
+   const cols=row.split("|").map(v=>v.trim());
+   return {label:cols[0]||"Experiment",question:cols[1]||"",g:Number(cols[2]||s.g),b:Number(cols[3]||s.b),target:Number(cols[4]||s.target),instruction:cols.slice(5).join(" | ")||""};
+  }).slice(0,6);
+ }
  if(nextType==="quizset"){s.questions=($("f-quizLines")?.value||"").split("\n").filter(x=>x.trim()).map(line=>{const cols=line.split("|").map(x=>x.trim());return {prompt:cols[0]||"",options:cols.slice(1,5),correct:cols[5]&&/^[A-D]$/i.test(cols[5])?cols[5].toUpperCase().charCodeAt(0)-65:-1,explanation:cols.slice(6).join(" | ")||""}})}
  if(nextType==="error"){s.wrong=$("f-wrong")?.value||"";s.challenge=$("f-challenge")?.value||"";s.correction=$("f-correction")?.value||""}
 }
@@ -562,7 +568,7 @@ function renderEditor(){
  :s.type==="compare"?field("compareLabels","Namen van twee kolommen (|)",(s.compareLabels||["Eerst","Na onderzoek"]).join(" | "))+field("compareItems","Vergelijkingen, links | rechts, per regel",(s.compareItems||[["Voorspelling","Nieuwe verklaring"]]).map(x=>x.join(" | ")).join("\n"),true)+field("compareConclusion","Conclusie, pas onthullen",s.compareConclusion||"",true)
  :s.type==="quizset"?field("quizLines","Per regel: vraag | A | B | C | D | juiste letter | uitleg",(s.questions||[]).map(q=>[q.prompt,...(q.options||[]),String.fromCharCode(65+(q.correct??-1)),q.explanation||""].join(" | ")).join("\n"),true)
  :s.type==="error"?field("wrong","Foutieve redenering of formule",s.wrong||"",true)+field("challenge","Wat moeten leerlingen verklaren?",s.challenge||"",true)+field("correction","Juiste uitwerking, pas na keuze",s.correction||"",true)
- :field("g","Groeifactor",s.g)+field("b","Beginwaarde",s.b)+field("target","Doelfactor (2 voor verdubbelen; 0,5 voor halveren)",s.target??(Number(s.g)<1?.5:2))+field("graphExplanation","Uitleg na onderzoek",s.graphExplanation||"",true));
+ :field("g","Groeifactor",s.g)+field("b","Beginwaarde",s.b)+field("target","Doelfactor (2 voor verdubbelen; 0,5 voor halveren)",s.target??(Number(s.g)<1?.5:2))+field("graphExplanation","Uitleg na onderzoek",s.graphExplanation||"",true)+field("experiments","Eigen experimenten (optioneel): naam | onderzoeksvraag | groeifactor | beginwaarde | doelfactor | instructie",(s.experiments||[]).map(x=>[x.label,x.question,x.g,x.b,x.target,x.instruction||""].join(" | ")).join("\n"),true));
  $("f-layout").value=LAYOUTS.has(s.layout)?s.layout:"inherit";
  $("type").onchange=()=>{const type=$("type").value;save();lesson.slides[selected].type=type;renderEditor()};
  review();
@@ -579,6 +585,7 @@ function review(){
   if(s.type==="practice"&&!s.tasks?.length)notes.push("Lesdeel "+(i+1)+": voeg opgaven toe.");
   if(s.type==="compare"&&!s.compareItems?.length)notes.push("Lesdeel "+(i+1)+": voeg vergelijkingen toe.");
   if(s.type==="graph"&&(s.g<=0||s.g===1||s.target<=0))notes.push("Lesdeel "+(i+1)+": controleer groeifactor en doelwaarde.");
+  if(s.type==="graph"&&s.experiments?.some(x=>!Number.isFinite(x.g)||x.g<=0||x.g===1||!Number.isFinite(x.b)||x.b<=0||!Number.isFinite(x.target)||x.target<=0))notes.push("Lesdeel "+(i+1)+": controleer de getallen in de eigen experimenten.");
   if(s.type==="quizset"&&(!s.questions?.length||s.questions.some(q=>q.options?.length<2||q.options?.length>4)))notes.push("Lesdeel "+(i+1)+": controleer de begripsvragen en antwoorden.");
   if(s.type==="error"&&(!s.wrong||!s.correction))notes.push("Lesdeel "+(i+1)+": vul de fout en verbetering in.");
  }
@@ -748,6 +755,15 @@ function normalizeLessonJSON(input){
    item.target=Number(first(b,["target","doelfactor"],g>1?2:.5));
    if(!Number.isFinite(item.target)||item.target<=0)throw Error("Lesdeel "+(index+1)+": de doelfactor moet positief zijn.");
    item.graphExplanation=asText(first(b,["graphExplanation","grafiekUitleg","verklaring"],""));
+   const experiments=first(b,["experiments","experimenten"],undefined);
+   if(experiments!==undefined){
+    if(!Array.isArray(experiments)||experiments.length>6)throw Error("Lesdeel "+(index+1)+": gebruik maximaal 6 experimenten.");
+    item.experiments=experiments.map((x,i)=>{
+     const gg=Number(first(x,["g","groeifactor"],item.g)),bb=Number(first(x,["b","beginwaarde"],item.b)),tt=Number(first(x,["target","doelfactor"],gg>1?2:.5));
+     if(!(gg>0&&gg!==1&&bb>0&&tt>0))throw Error("Experiment "+(i+1)+": controleer groeifactor, beginwaarde en doelwaarde.");
+     return {label:asText(first(x,["label","naam","title"],"Experiment "+(i+1))),question:asText(first(x,["question","vraag"],"")),instruction:asText(first(x,["instruction","instructie"],"")),g:gg,b:bb,target:tt};
+    });
+   }
   }
   if(type==="table"){
    item.columnLabels=twoColumns(first(b,["columnLabels","kolommen"],["Tijd","Waarde"])).slice(0,2);
@@ -822,7 +838,7 @@ let graphLinear=false,graphMarks=false,graphSelectedTime=null;
 let graphMode=0,graphActivePreset=null;
 function availableExperiments(s){
  const b=Number(s.b)||1000,g=Number(s.g)||Math.pow(2,1/12),up=g>1;
- if(Array.isArray(s.experiments)&&s.experiments.length)return s.experiments.slice(0,6);
+ if(Array.isArray(s.experiments)&&s.experiments.length&&s.experiments.every(x=>Number.isFinite(x.g)&&x.g>0&&x.g!==1&&Number.isFinite(x.b)&&x.b>0&&Number.isFinite(x.target)&&x.target>0))return s.experiments.slice(0,6);
  return [
  {label:up?"Verdubbelen":"Halveren",question:up?"Duurt de volgende verdubbeling even lang?":"Duurt de volgende halvering even lang?",instruction:"Voorspel eerst. Verander daarna de instellingen en toon pas later meetpunten.",g,b,target:up?2:.5},
  {label:"Beginwaarde",question:"Wat verandert er als het startbedrag groter wordt?",instruction:"Verander de beginwaarde. Verklaar wat wél en niet verandert.",g,b:Math.min(5000,b*2),target:up?2:.5},
@@ -1048,7 +1064,7 @@ function compareVotes(id){
  floatPanel("comparePanel","Eerste en tweede stemming",head+'<div class="compare-row compare-head"><b></b><span>Eerst</span><span>Later</span><span>Verschil</span></div>'+rows+'<p class="hint">De aantallen tonen antwoorden van de groep, niet welke individuele leerling van mening veranderde.</p>');
 }
 function togglePoll(){pollVisible=!pollVisible;if(pollVisible)renderPoll();else $("pollPanel")?.remove()}
-function toggleAnswer(){const s=currentSlide();if(s.later){floatPanel("notesPanel","Antwoord nog niet tonen",'<p>De openingsvraag komt terug tijdens het grafiekonderzoek. Laat leerlingen eerst zelf onderzoeken.</p>');return}revealed=!revealed;renderSlide()}
+function toggleAnswer(){const s=currentSlide();if(s.type==="quizset"){quizAnswersVisible=!quizAnswersVisible;renderSlide();return}if(s.type==="error"){errorCorrectionVisible=!errorCorrectionVisible;renderSlide();return}if(s.later){floatPanel("notesPanel","Antwoord nog niet tonen",'<p>De openingsvraag komt terug tijdens het grafiekonderzoek. Laat leerlingen eerst zelf onderzoeken.</p>');return}revealed=!revealed;renderSlide()}
 function undo(){let arr=paths[currentSlide().id]||[];arr.pop();$("draw").innerHTML=arr.join("")}
 function clearDraw(){paths[currentSlide().id]=[];$("draw").innerHTML=""}
 function stopTimer(){clearInterval(timerHandle);timerHandle=null;timerRunning=false}
